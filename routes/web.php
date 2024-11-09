@@ -49,8 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Event start and end dates
         $eventStartDate = Carbon::create(2024, 11, 10); // 10th November 2024
         $eventEndDate = Carbon::create(2024, 12, 31);  // 31st December 2024
-        // $currentDate = Carbon::now();
-        $currentDate = Carbon::create(2024, 11, 12);
+        $currentDate = Carbon::now();
+        // $currentDate = Carbon::create(2024, 11, 12);
         if ($currentDate->between($eventStartDate, $eventEndDate)) {
             // Calculate the number of days since the start of the event
             $daysSinceEventStart = $eventStartDate->diffInDays($currentDate);

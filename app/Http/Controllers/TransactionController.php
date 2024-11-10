@@ -9,7 +9,7 @@ use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
-use thiagoalessio\TesseractOCR\TesseractOCR;
+use Illuminate\Support\Facades\Http;
 use DateTime; // Import DateTime from the global namespace
 use Exception; // Import Exception from the global namespace
 use Silber\Bouncer\BouncerFacade;
@@ -81,29 +81,48 @@ class TransactionController extends Controller
             // Full path to the uploaded image
             $imageFullPath = storage_path('app/public/' . $imagePath);
 
-            // Use Tesseract OCR to extract text from the image
-            $extractedText = (new TesseractOCR($imageFullPath))->run();
+            // OCR.space API key (replace 'your_api_key' with your actual API key)
+            $apiKey = 'K87900716488957';
 
-            // Continue with existing extraction...
-            $reference_id = $this->extractReferenceID($extractedText);
-            $date = $this->extractDate($extractedText);
-            $amount = $this->extractAmount($extractedText);
-
-            // Log the full extracted text for debugging purposes
-            logger()->info('Extracted Text:', ['text' => $extractedText]);
-            
-            logger()->info('Extracted Data:', [
-                'reference_id' => $reference_id,
-                'date' => $date,
-                'amount' => $amount,
+            // Make a request to OCR.space API
+            $response = Http::attach(
+                'file', file_get_contents($imageFullPath), 'image.jpg'
+            )->post('https://api.ocr.space/parse/image', [
+                'apikey' => $apiKey,
+                'language' => 'eng',
+                'isOverlayRequired' => false,
             ]);
 
-            return redirect()->route('transactions.show')
-                            ->with([
-                                'reference_id' => $reference_id,
-                                'date' => $date,
-                                'amount' => $amount
-                            ]);
+            // Decode JSON response from OCR.space
+            $ocrData = $response->json();
+
+            if (isset($ocrData['ParsedResults'][0]['ParsedText'])) {
+                // Extracted text from OCR.space
+                $extractedText = $ocrData['ParsedResults'][0]['ParsedText'];
+
+                // Continue with existing extraction...
+                $reference_id = $this->extractReferenceID($extractedText);
+                $date = $this->extractDate($extractedText);
+                $amount = $this->extractAmount($extractedText);
+
+                // Log the full extracted text for debugging purposes
+                logger()->info('Extracted Text:', ['text' => $extractedText]);
+                logger()->info('Extracted Data:', [
+                    'reference_id' => $reference_id,
+                    'date' => $date,
+                    'amount' => $amount,
+                ]);
+
+                return redirect()->route('transactions.show')
+                                ->with([
+                                    'reference_id' => $reference_id,
+                                    'date' => $date,
+                                    'amount' => $amount
+                                ]);
+            } else {
+                logger()->error('OCR.space API Error:', ['response' => $ocrData]);
+                return back()->withErrors(['image_url' => 'OCR failed to extract text. Please try again.']);
+            }
         }
 
         return back()->withErrors(['image_url' => 'Image upload failed']);

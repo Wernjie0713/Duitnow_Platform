@@ -28,6 +28,7 @@ class DashboardController extends Controller
     {
         $data = DB::table('users')
             ->where('id', '!=', 1) // Exclude the admin or specific user with id 1
+            ->where('is_profile_complete', true)
             ->orderBy('total_count', 'desc')
             ->select('name', 'email', 'matric_no', 'duitnow_id', 'phone_no', 'faculty', 'campus', 'total_count')
             ->get();
@@ -42,6 +43,7 @@ class DashboardController extends Controller
             $weekColumn = 'week' . $selectedWeek . '_count';
 
             $data = User::whereNot('id', 1)
+                ->where('is_profile_complete', true)
                 ->select('name', 'email', 'matric_no', 'duitnow_id', 'phone_no', 'faculty', 'campus', $weekColumn)
                 ->orderByDesc($weekColumn)
                 ->get();
@@ -74,6 +76,7 @@ class DashboardController extends Controller
             $monthColumn = $selectedMonth . '_count';
     
             $data = User::whereNot('id', 1)
+                ->where('is_profile_complete', true)
                 ->select('name', 'email', 'matric_no', 'duitnow_id', 'phone_no', 'faculty', 'campus', $monthColumn)
                 ->orderByDesc($monthColumn)
                 ->get();

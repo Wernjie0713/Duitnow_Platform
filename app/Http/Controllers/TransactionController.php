@@ -68,72 +68,73 @@ class TransactionController extends Controller
     }
 
     public function store(Request $request)
-    {
-        // Validate the uploaded image
-        $request->validate([
-            'image_url' => 'required|file|mimes:jpeg,png,jpg|max:2048', // Ensure it's an image
-        ]);
+	{
+		// Validate the uploaded image
+		$request->validate([
+			'image_url' => 'required|file|mimes:jpeg,png,jpg|max:2048', // Ensure it's an image
+		]);
 
-        // Handle the image file if uploaded
-        if ($request->hasFile('image_url')) {
-            $imagePath = $request->file('image_url')->store('transactions', 'public'); // Store the image
+		// Handle the image file if uploaded
+		if ($request->hasFile('image_url')) {
+			$imagePath = $request->file('image_url')->store('transactions', 'public'); // Store the image
 
-            // Full path to the uploaded image
-            $imageFullPath = storage_path('app/public/' . $imagePath);
+			// Full path to the uploaded image
+			$imageFullPath = storage_path('app/public/' . $imagePath);
 
-            // OCR.space API key (replace 'your_api_key' with your actual API key)
-            $apiKey = 'K87900716488957';
+			// OCR.space API key (replace 'your_api_key' with your actual API key)
+			$apiKey = 'K87900716488957';
 
-            // Make a request to OCR.space API
-            $response = Http::attach(
-                'file', file_get_contents($imageFullPath), 'image.jpg'
-            )->post('https://api.ocr.space/parse/image', [
-                'apikey' => $apiKey,
-                'language' => 'eng',
-                'isOverlayRequired' => false,
-            ]);
+			// Make a request to OCR.space API
+			$response = Http::attach(
+				'file', file_get_contents($imageFullPath), 'image.jpg'
+			)->post('https://api.ocr.space/parse/image', [
+				'apikey' => $apiKey,
+				'language' => 'eng',
+				'isOverlayRequired' => 'false', // Set to 'false' as a string
+			]);
 
-            // Decode JSON response from OCR.space
-            $ocrData = $response->json();
+			// Decode JSON response from OCR.space
+			$ocrData = $response->json();
 
-            if (isset($ocrData['ParsedResults'][0]['ParsedText'])) {
-                // Extracted text from OCR.space
-                $extractedText = $ocrData['ParsedResults'][0]['ParsedText'];
+			if (isset($ocrData['ParsedResults'][0]['ParsedText'])) {
+				// Extracted text from OCR.space
+				$extractedText = $ocrData['ParsedResults'][0]['ParsedText'];
 
-                // Continue with existing extraction...
-                $reference_id = $this->extractReferenceID($extractedText);
-                $date = $this->extractDate($extractedText);
-                $amount = $this->extractAmount($extractedText);
+				// Use helper methods to extract specific data from the text
+				$reference_id = $this->extractReferenceID($extractedText);
+				$date = $this->extractDate($extractedText);
+				$amount = $this->extractAmount($extractedText);
 
-                // Log the full extracted text for debugging purposes
-                logger()->info('Extracted Text:', ['text' => $extractedText]);
-                logger()->info('Extracted Data:', [
-                    'reference_id' => $reference_id,
-                    'date' => $date,
-                    'amount' => $amount,
-                ]);
+				// Log the full extracted text for debugging purposes
+				logger()->info('Extracted Text:', ['text' => $extractedText]);
+				logger()->info('Extracted Data:', [
+					'reference_id' => $reference_id,
+					'date' => $date,
+					'amount' => $amount,
+				]);
 
-                return redirect()->route('transactions.show')
-                                ->with([
-                                    'reference_id' => $reference_id,
-                                    'date' => $date,
-                                    'amount' => $amount
-                                ]);
-            } else {
-                logger()->error('OCR.space API Error:', ['response' => $ocrData]);
-                return back()->withErrors(['image_url' => 'OCR failed to extract text. Please try again.']);
-            }
-        }
+				return redirect()->route('transactions.show')
+								->with([
+									'reference_id' => $reference_id,
+									'date' => $date,
+									'amount' => $amount
+								]);
+			} else {
+				logger()->error('OCR.space API Error:', ['response' => $ocrData]);
+				return back()->withErrors(['image_url' => 'OCR failed to extract text. Please try again.']);
+			}
+		}
 
-        return back()->withErrors(['image_url' => 'Image upload failed']);
-    }
-
+		return back()->withErrors(['image_url' => 'Image upload failed']);
+	}
+    
     private function extractReferenceID($text) {
         // Regular expressions for different cases of reference IDs
         $patterns = [
             '/Reference ID\s*[\r\n]?\s*(\w+)/i',          // Matches 'Reference ID'
             '/Transaction No.\s*[\r\n]?\s*(\w+)/i',       // Matches 'Transaction No.'
             '/Reference No.\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference No.'
+			'/Reference Number\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference Number'
             '/OCTO Reference No.\s*[\r\n]?\s*(\w+)/i',    // Specific for CIMB 'OCTO Reference No.'
         ];
     
@@ -189,19 +190,22 @@ class TransactionController extends Controller
     }
     
     private function extractAmount($text) {
-        // Attempt to match "RM" amounts where an optional hyphen and spaces can precede "RM"
-        if (preg_match('/(?<!\S)-?\s*RM[\s\x{00A0}]*([0-9,.]+)/iu', $text, $matches)) {
-            return $matches[1]; // Return the amount after "RM"
-        }
+		// Correct common OCR misinterpretations for numbers
+		$text = str_replace(['I', 'O'], ['1', '0'], $text);
 
+		// Adjust regex to allow optional space or hyphen between "RM" and the amount
+		if (preg_match('/(?<!\S)-?\s*RM\s*([0-9]+(?:\.[0-9]{2})?)/iu', $text, $matches)) {
+			return $matches[1]; // Return the amount after "RM"
+		}
 
-        // Attempt to match "MYR" amounts (specific for the RHB case)
-        if (preg_match('/MYR[\s\x{00A0}]*([0-9,.]+)/iu', $text, $matches)) {
-            return $matches[1]; // Return the amount after "MYR"
-        }
-    
-        return null; // If neither pattern matches
-    }
+		// Adjust regex for "MYR" amounts (specific for the RHB case)
+		if (preg_match('/MYR\s*([0-9]+(?:\.[0-9]{2})?)/iu', $text, $matches)) {
+			return $matches[1]; // Return the amount after "MYR"
+		}
+
+		return null; // If neither pattern matches
+	}
+
     
     public function show(Request $request): \Inertia\Response
     {

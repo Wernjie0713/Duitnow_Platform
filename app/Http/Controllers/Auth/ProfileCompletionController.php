@@ -33,7 +33,7 @@ class ProfileCompletionController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'matric_no' => 'required|string|unique:'.User::class,
-            'duitnow_id' => 'required|string|max:11|unique:'.User::class,
+            'duitnow_id' => 'required|string|max:20|unique:'.User::class,
             'faculty' => 'required|string',
             'campus' => 'required|string',
             'phone_no' => 'required|string|max:15|unique:'.User::class,

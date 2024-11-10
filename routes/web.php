@@ -68,12 +68,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $facultyRanking = $dashboardController->getFacultyRanking()->getData();
 
         return Inertia::render('Dashboard', [
-            'cumulative' => User::where('id', '!=', 1)->orderBy('total_count', 'desc')->orderBy('name', 'asc')->paginate(10),
-            'monthly' => User::where('id', '!=', 1)->orderBy($monthlyOrderColumn, 'desc')->orderBy('name', 'asc')->paginate(10),
-            'weekly' => User::where('id', '!=', 1)->orderBy($weekColumn, 'desc')->orderBy('name', 'asc')->paginate(10),
-            'cumulativeAll' => User::where('id', '!=', 1)->orderBy('total_count', 'desc')->orderBy('name', 'asc')->get(),
-            'monthlyAll' => User::where('id', '!=', 1)->orderBy($monthlyOrderColumn, 'desc')->orderBy('name', 'asc')->get(),
-            'weeklyAll' => User::where('id', '!=', 1)->orderBy($weekColumn, 'desc')->orderBy('name', 'asc')->get(),
+            'cumulative' => User::where('id', '!=', 1)
+                    ->where('is_profile_complete', true)
+                    ->orderBy('total_count', 'desc')
+                    ->orderBy('name', 'asc')
+                    ->paginate(10),
+
+            'monthly' => User::where('id', '!=', 1)
+                            ->where('is_profile_complete', true)
+                            ->orderBy($monthlyOrderColumn, 'desc')
+                            ->orderBy('name', 'asc')
+                            ->paginate(10),
+
+            'weekly' => User::where('id', '!=', 1)
+                            ->where('is_profile_complete', true)
+                            ->orderBy($weekColumn, 'desc')
+                            ->orderBy('name', 'asc')
+                            ->paginate(10),
+
+            'cumulativeAll' => User::where('id', '!=', 1)
+                                ->where('is_profile_complete', true)
+                                ->orderBy('total_count', 'desc')
+                                ->orderBy('name', 'asc')
+                                ->get(),
+
+            'monthlyAll' => User::where('id', '!=', 1)
+                                ->where('is_profile_complete', true)
+                                ->orderBy($monthlyOrderColumn, 'desc')
+                                ->orderBy('name', 'asc')
+                                ->get(),
+
+            'weeklyAll' => User::where('id', '!=', 1)
+                            ->where('is_profile_complete', true)
+                            ->orderBy($weekColumn, 'desc')
+                            ->orderBy('name', 'asc')
+                            ->get(),
+                            
             'current_user' => Auth::user(),
             'isAdmin' => BouncerFacade::is(Auth::user())->an('admin'),
             'facultyRanking' => $facultyRanking,

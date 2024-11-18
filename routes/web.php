@@ -14,6 +14,7 @@ use Silber\Bouncer\BouncerFacade;
 use Illuminate\Http\Request;
 use App\Http\Controllers\FacultyRankingController;
 use App\Http\Controllers\ContactUsController;
+use App\Models\Transaction;
 
 Route::get('/', function () {
     return Inertia::render('Auth/Login', [
@@ -26,6 +27,7 @@ Route::get('/export/faculty-ranking', [FacultyRankingController::class, 'export'
 Route::get('/export/cumulative-leaderboard', [DashboardController::class, 'exportCumulativeLeaderboard'])->name('export.cumulative-leaderboard');
 Route::get('/export/weekly-leaderboard', [DashboardController::class, 'exportWeeklyLeaderboard'])->name('export.weekly-leaderboard');
 Route::get('/export/monthly-leaderboard', [DashboardController::class, 'exportMonthlyLeaderboard'])->name('export.monthly-leaderboard');
+Route::get('/export/transactions', [DashboardController::class, 'exportTransactions'])->name('export.transactions');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/complete-profile', [ProfileCompletionController::class, 'show'])->name('profile.complete');
@@ -107,6 +109,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'current_user' => Auth::user(),
             'isAdmin' => BouncerFacade::is(Auth::user())->an('admin'),
             'facultyRanking' => $facultyRanking,
+            'transactions' => Transaction::with('user')
+                ->orderBy('id', 'desc')
+                ->paginate(10)
         ]);
     })->name('dashboard');
 });

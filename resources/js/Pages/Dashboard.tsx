@@ -8,7 +8,7 @@ import DashboardStats from './DashboardComponent/DashboardStats';
 import TermsAndCondition from './DashboardComponent/TermsAndCondition';
 import AdminDashboard from './DashboardComponent/AdminDashboard';
 
-export default function Dashboard({ cumulative, monthly, weekly, facultyRanking, current_user, isAdmin, cumulativeAll, monthlyAll, weeklyAll }) {
+export default function Dashboard({ cumulative, monthly, weekly, facultyRanking, current_user, isAdmin, cumulativeAll, monthlyAll, weeklyAll, transactions }) {
     return (
         <AuthenticatedLayout 
             isAdmin={isAdmin}
@@ -68,7 +68,7 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
             )
             :
             (
-                <AdminDashboard current_user={current_user} cumulative={cumulative} facultyRanking={facultyRanking} weekly={weekly} monthly={monthly} isAdmin={isAdmin} weeklyAll={weeklyAll} monthlyAll={monthlyAll} cumulativeAll={cumulativeAll}/>
+                <AdminDashboard current_user={current_user} cumulative={cumulative} facultyRanking={facultyRanking} weekly={weekly} monthly={monthly} isAdmin={isAdmin} weeklyAll={weeklyAll} monthlyAll={monthlyAll} cumulativeAll={cumulativeAll} transactions={transactions} />
             )}
         </AuthenticatedLayout>
     );

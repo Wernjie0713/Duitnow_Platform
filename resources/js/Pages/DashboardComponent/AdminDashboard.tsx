@@ -11,8 +11,9 @@ import CumulativeLeaderboardTable from './CumulativeLeaderboardTable';
 import MonthlyLeaderboardTable from './MonthlyLeaderboardTable';
 import WeeklyLeaderboardTable from './WeeklyLeaderboardTable';
 import FacultyRankingTable from './FacultyRankingTable';
+import TransactionTable from "./TransactionTable";
 
-export default function AdminDashboard({ weekly, monthly, cumulative, facultyRanking, current_user, isAdmin, weeklyAll, monthlyAll, cumulativeAll }) {
+export default function AdminDashboard({ weekly, monthly, cumulative, facultyRanking, current_user, isAdmin, weeklyAll, monthlyAll, cumulativeAll, transactions }) {
     const [selectedValue, setSelectedValue] = useState<string>(() => {
         const saved = localStorage.getItem("selectedValue");
         return saved !== null ? saved : '';
@@ -66,6 +67,7 @@ export default function AdminDashboard({ weekly, monthly, cumulative, facultyRan
                         <SelectItem value="Monthly">Monthly</SelectItem>
                         <SelectItem value="Cumulative">Cumulative</SelectItem>
                         <SelectItem value="FacultyRanking">Faculty Ranking</SelectItem>
+                        <SelectItem value="TransactionTable">Transaction Table</SelectItem>
                     </SelectContent>
                 </Select>
 
@@ -159,6 +161,9 @@ export default function AdminDashboard({ weekly, monthly, cumulative, facultyRan
                 }
                 {selectedValue === 'FacultyRanking' && (
                     <FacultyRankingTable faculties={facultyRanking} />
+                )}
+                {selectedValue === 'TransactionTable' && (
+                    <TransactionTable transactions={transactions.data} links={transactions.links} />
                 )}
             </div>
         </div>

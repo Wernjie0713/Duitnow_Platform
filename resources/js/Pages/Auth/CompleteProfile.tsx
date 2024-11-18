@@ -12,6 +12,8 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/Components/ui/select";
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 export default function CompleteProfile() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -81,19 +83,15 @@ export default function CompleteProfile() {
 
                 <div className="mt-4">
                     <InputLabel htmlFor="phone_no" value="Phone No." />
-
-                    <TextInput
+                    <PhoneInput
                         id="phone_no"
-                        type="tel"
-                        name="phone_no"
+                        placeholder="Enter phone number"
                         value={data.phone_no}
-                        className="mt-1 block w-full"
-                        autoComplete="tel"
-                        isFocused={true}
-                        onChange={(e) => setData('phone_no', e.target.value)}
+                        onChange={(value) => setData('phone_no', value || '')}
+                        defaultCountry="MY"  // Set the default country code (e.g., MY for Malaysia)
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         required
                     />
-
                     <InputError message={errors.phone_no} className="mt-2" />
                 </div>
 

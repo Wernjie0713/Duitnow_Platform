@@ -19,12 +19,14 @@ interface TransactionProps{
     reference_id: string;
     date: string; // Use Date if it's a date object
     amount: string | number;
+    transaction_type: string;
+    image_url: string;
     [key: string]: any; // Index signature to allow additional properties
 }
 
 export default function ShowTransaction({ isAdmin }: { isAdmin: boolean }) {
     // Cast the props from usePage to TransactionProps
-    const { auth, reference_id, date, amount } = usePage<TransactionProps>().props;
+    const { auth, reference_id, date, amount, transaction_type, image_url } = usePage<TransactionProps>().props;
     const user = auth.user;
 
 
@@ -32,7 +34,9 @@ export default function ShowTransaction({ isAdmin }: { isAdmin: boolean }) {
     const { post, processing } = useForm({
         reference_id,
         date,
-        amount
+        amount,
+        transaction_type,
+        image_url
     });
 
     // Handle form submission (confirmation)
@@ -61,6 +65,14 @@ export default function ShowTransaction({ isAdmin }: { isAdmin: boolean }) {
             <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 max-w-7xl">
                 <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
                     <form onSubmit={handleSubmit}>
+                        {transaction_type && (
+                            <div className="mb-4">
+                                <label className="font-semibold block">Transaction Type:</label>
+                                <p className="text-sm sm:text-base">{transaction_type}</p>
+                                <input type="hidden" name="image_url" value="{{ image_url }}" />
+                            </div>
+                        )}
+
                         <div className="mb-4">
                             <label className="font-semibold block">Reference ID:</label>
                             <p className="text-sm sm:text-base">{reference_id}</p>

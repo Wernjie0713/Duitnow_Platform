@@ -16,6 +16,7 @@ class Transaction extends Model
         'date',
         'amount',
         'image_url',
+        'transaction_type'
     ];
 
     public function user(): BelongsTo

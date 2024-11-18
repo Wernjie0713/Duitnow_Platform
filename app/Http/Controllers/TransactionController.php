@@ -42,7 +42,11 @@ class TransactionController extends Controller
             'date' => 'required|date|after_or_equal:2024-11-10|before_or_equal:today',
             // 'date' => 'required|date',
             'amount' => 'required|numeric|min:0.01|max:999999.99',
+            'transaction_type' => 'string',
+            'image_url' => 'required|url',
         ]);
+
+        logger()->info('Image URL in confirm:', ['url' => $request->image_url]);
 
         // Create and save a new transaction using the confirmed data
         $transaction = new Transaction();
@@ -50,6 +54,8 @@ class TransactionController extends Controller
         $transaction->reference_id = $request->reference_id;
         $transaction->date = $request->date;
         $transaction->amount = $request->amount;
+        $transaction->transaction_type = $request->transaction_type;
+        $transaction->image_url = $request->image_url;
         
         // Save the transaction to the database
         $transaction->save();
@@ -78,6 +84,7 @@ class TransactionController extends Controller
 		if ($request->hasFile('image_url')) {
 			$imagePath = $request->file('image_url')->store('transactions', 'public'); // Store the image
 
+            $imageUrl = asset('storage/' . $imagePath);
 			// Full path to the uploaded image
 			$imageFullPath = storage_path('app/public/' . $imagePath);
 
@@ -104,6 +111,7 @@ class TransactionController extends Controller
 				$reference_id = $this->extractReferenceID($extractedText);
 				$date = $this->extractDate($extractedText);
 				$amount = $this->extractAmount($extractedText);
+                $transaction_type = $this->extractTransactionType($extractedText);  
 
 				// Log the full extracted text for debugging purposes
 				logger()->info('Extracted Text:', ['text' => $extractedText]);
@@ -111,13 +119,17 @@ class TransactionController extends Controller
 					'reference_id' => $reference_id,
 					'date' => $date,
 					'amount' => $amount,
+                    'transaction_type' => $transaction_type,
+                    'image_url' => $imageUrl,
 				]);
 
 				return redirect()->route('transactions.show')
 								->with([
 									'reference_id' => $reference_id,
 									'date' => $date,
-									'amount' => $amount
+									'amount' => $amount,
+                                    'transaction_type' => $transaction_type,
+                                    'image_url' => $imageUrl,
 								]);
 			} else {
 				logger()->error('OCR.space API Error:', ['response' => $ocrData]);
@@ -206,15 +218,53 @@ class TransactionController extends Controller
 		return null; // If neither pattern matches
 	}
 
+    private function extractTransactionType($text) {
+        // Define known transaction type keywords, from more specific to more generic
+        $transactionTypes = [
+            'DuitNow QR TNGD', // more specific
+            'DuitNow QR TNGo', // similar variations, prioritize if any
+            'DuitNow QR',      // more generic
+            'Payment',         // generic payment term
+            'Transfer', 
+            'QR Payment',
+        ];
+    
+        // Try to find the "Transaction Type" label and capture data nearby
+        $pattern = '/Transaction Type[\s\S]{0,40}(.*?)(\s|$)/i';
+    
+        if (preg_match($pattern, $text, $matches)) {
+            $possibleType = trim($matches[1]);
+    
+            // Check if the extracted type matches any known types
+            foreach ($transactionTypes as $type) {
+                if (stripos($possibleType, $type) !== false) {
+                    return $type;
+                }
+            }
+        }
+    
+        // Fallback approach: if "Transaction Type" is not nearby, search the whole text
+        foreach ($transactionTypes as $type) {
+            if (stripos($text, $type) !== false) {
+                return $type;
+            }
+        }
+    
+        return null; // If no valid transaction type is found
+    }    
     
     public function show(Request $request): \Inertia\Response
     {
+        $imageUrl = $request->session()->get('image_url');
+        logger()->info('Extracted Text in show:', ['text' => $imageUrl]);
         // Retrieve the data from the session flash (set by with())
         return Inertia::render('Transactions/Show', [
             'reference_id' => $request->session()->get('reference_id'),
             'date' => $request->session()->get('date'),
             'amount' => $request->session()->get('amount'),
+            'transaction_type' => $request->session()->get('transaction_type'),
             'isAdmin' => BouncerFacade::is(Auth::user())->an('admin'),
+            'image_url' => $imageUrl,
         ]);
     }
 
@@ -236,39 +286,26 @@ class TransactionController extends Controller
 
             // Calculate week number (1-based)
             $weekNumber = ceil(($daysSinceEventStart + 1) / 7);
-
-            // Get the current week number based on the mock date
-            $currentWeekNumber = ceil(($eventStartDate->diffInDays(Carbon::now()) + 1) / 7);
-            // $currentWeekNumber = ceil(($eventStartDate->diffInDays(Carbon::create(2024, 11, 12)) + 1) / 7);
-
+            
+            $transactionMonth = $transactionDate->month;
+            $currentMonth = Carbon::now()->month;
             // Check if the transaction week is before the current week
-            if ($weekNumber < $currentWeekNumber) {
-                throw ValidationException::withMessages([
-                    'date' => ['You cannot add transactions for past weeks.'],
-                ]);
-            }
-            else{
-                // Ensure the week number is valid (1-8)
-                if ($weekNumber >= 1 && $weekNumber <= 8) {
-                    $weekColumn = 'week' . $weekNumber . '_count'; // e.g., week1_count, week2_count, etc.
-                    $user->{$weekColumn} += 1; // Increment the specific week's count
-                }
-
-                $transactionMonth = $transactionDate->month;
-                $currentMonth = Carbon::now()->month;
-
-                if($transactionMonth < $currentMonth)
+            if($transactionMonth < $currentMonth)
                 {
                     throw ValidationException::withMessages([
                         'date' => ['You cannot add transactions for past months.'],
                     ]);
                 }
-                else{
+            else{
+                // Ensure the week number is valid (1-8)
+                    if ($weekNumber >= 1 && $weekNumber <= 8) {
+                        $weekColumn = 'week' . $weekNumber . '_count'; // e.g., week1_count, week2_count, etc.
+                        $user->{$weekColumn} += 1; // Increment the specific week's count
+                    }
                     // Update the total count for Oct, Nov, Dec
                     if ($transactionMonth >= 11 && $transactionMonth <= 12) {
                         $user->total_count += 1;
                     }
-    
                     // Update the specific month's count
                     switch ($transactionMonth) {
                         case 11:
@@ -281,12 +318,10 @@ class TransactionController extends Controller
                             // If other months are needed, handle them here
                             break;
                     }
-    
+
                     // Save the user model with the updated counts
                     $user->save();
-                }
+                    }
             }
-
-        }
     }
 }

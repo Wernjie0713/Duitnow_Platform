@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('date');
             $table->decimal('amount', 10, 2);
             $table->string('image_url')->unique()->nullable();
+            $table->string('transaction_type')->nullable();
             $table->timestamps();
         });
     }

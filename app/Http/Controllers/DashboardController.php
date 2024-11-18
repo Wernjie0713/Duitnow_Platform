@@ -23,6 +23,16 @@ class DashboardController extends Controller
         return response()->json($facultyRanking);
     }
 
+    public function exportTransactions()
+    {
+        $data = DB::table('transactions')
+            ->orderBy('id', 'desc')
+            ->select('id', 'transaction_type', 'reference_id', 'date', 'amount', 'image_url')
+            ->get();
+
+        return $this->streamCSV($data, 'RecordedTransactions.csv', ['ID', 'Transaction Type', 'Reference ID', 'Date', 'Amount', 'Image URL']);
+    }
+
      // Export Cumulative Leaderboard
     public function exportCumulativeLeaderboard()
     {

@@ -16,9 +16,11 @@ use App\Http\Controllers\FacultyRankingController;
 use App\Http\Controllers\ContactUsController;
 use App\Models\Transaction;
 
+
 Route::get('/', function () {
     return Inertia::render('Auth/Login', [
         'canRegister' => Route::has('register'),
+        'canResetPassword' => Route::has('password.request'),
     ]);
 });
 
@@ -140,5 +142,9 @@ Route::post('/transactions/confirm', [TransactionController::class, 'confirm'])
 Route::resource('contactus', ContactUsController::class)
 ->only(['index', 'store'])
 ->middleware(['auth', 'verified']); 
+
+Route::post('/contactus/{contactUs}/comments', [ContactUsController::class, 'storeComment'])
+    ->name('contactus.comments.store')
+    ->middleware(['auth', 'verified']);
 
 require __DIR__.'/auth.php';

@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
 use Silber\Bouncer\BouncerFacade;
+use App\Models\Comment;
 
 class ContactUsController extends Controller
 {
@@ -18,11 +19,8 @@ class ContactUsController extends Controller
     public function index(): Response
     {
         return Inertia::render('ContactUs/Index', [
-            'messages' => ContactUs::with('user')
-                        ->where('user_id', auth()->id())
-                        ->latest()->get(),
-                        
-            'adminMessages' => ContactUs::with('user')->latest()->get(),
+            'messages' => ContactUs::with(['user', 'comments.user'])->where('user_id', auth()->id())->latest()->get(),
+            'adminMessages' => ContactUs::with(['user', 'comments.user'])->latest()->get(),
             'isAdmin' => BouncerFacade::is(auth()->user())->an('admin'),
         ]);
     }
@@ -47,6 +45,20 @@ class ContactUsController extends Controller
         $request->user()->contactus()->create($validated);
  
         return redirect(route('contactus.index'));
+    }
+
+    public function storeComment(Request $request, ContactUs $contactUs)
+    {
+        $validated = $request->validate([
+            'comment' => 'required|string|max:500',
+        ]);
+
+        $contactUs->comments()->create([
+            'user_id' => auth()->id(),
+            'comment' => $validated['comment'],
+        ]);
+
+        return back();
     }
 
     /**

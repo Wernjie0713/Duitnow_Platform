@@ -38,11 +38,10 @@ class TransactionController extends Controller
     {
         // Validate the confirmed data
         $request->validate([
-            'reference_id' => 'required|string|unique:transactions,reference_id|max:50',
+            'reference_id' => 'required|string|unique:transactions,reference_id',
             'date' => 'required|date|after_or_equal:2024-11-10|before_or_equal:today',
             // 'date' => 'required|date',
             'amount' => 'required|numeric|min:0.01|max:999999.99',
-            'transaction_type' => 'string',
             'image_url' => 'required|url',
         ]);
 
@@ -140,27 +139,116 @@ class TransactionController extends Controller
 		return back()->withErrors(['image_url' => 'Image upload failed']);
 	}
     
-    private function extractReferenceID($text) {
-        // Regular expressions for different cases of reference IDs
-        $patterns = [
-            '/Reference ID\s*[\r\n]?\s*(\w+)/i',          // Matches 'Reference ID'
-            '/Transaction No.\s*[\r\n]?\s*(\w+)/i',       // Matches 'Transaction No.'
-            '/Reference No.\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference No.'
-			'/Reference Number\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference Number'
-            '/OCTO Reference No.\s*[\r\n]?\s*(\w+)/i',    // Specific for CIMB 'OCTO Reference No.'
-        ];
+    // private function extractReferenceID($text) {
+    //     // Regular expressions for different cases of reference IDs
+        // $patterns = [
+        //     '/Reference ID\s*[\r\n]?\s*(\w+)/i',          // Matches 'Reference ID'
+        //     '/Transaction No.\s*[\r\n]?\s*(\w+)/i',       // Matches 'Transaction No.'
+        //     '/Reference No.\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference No.'
+		// 	'/Reference Number\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference Number'
+        //     '/OCTO Reference No.\s*[\r\n]?\s*(\w+)/i',    // Specific for CIMB 'OCTO Reference No.'
+        // ];
     
-        // Iterate through each pattern to find a match
-        foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $text, $matches)) {
-                return $matches[1]; // Return the matched reference number
+        // // Iterate through each pattern to find a match
+        // foreach ($patterns as $pattern) {
+        //     if (preg_match($pattern, $text, $matches)) {
+        //         return $matches[1]; // Return the matched reference number
+        //     }
+        // }
+    
+    //     return null; // Fallback if no match is found
+    // }
+    private function extractReferenceID($text) {
+        // Preprocess the text
+        $text = str_replace(["\n", "\r"], ' ', $text); // Remove line breaks
+        $text = preg_replace('/\s+/', ' ', $text); // Replace multiple spaces with a single space
+        logger()->info('Preprocessed OCR Text:', ['text' => $text]);
+
+        // Adjust regex for OCR misinterpretations (allow `O` for `0`, etc.)
+        $correctedText = str_replace(['I', 'O', 'S'], ['1', '0', '5'], $text);
+        logger()->info('Corrected OCR Text:', ['text' => $correctedText]);
+        
+        if (strpos($correctedText, 'BANK@AM') !== false) {
+            logger()->info('Match:', ['text' => 'I found it!']);
+            if (preg_match('/Reference No.\s*[\r\n]?\s*(\w+)/i', $correctedText, $matches)) {
+                return $matches[1];
             }
         }
-    
+        else if (strpos($correctedText, '0CT0') !== false) {
+            logger()->info('Match:', ['text' => 'I found it!']);
+        
+            // Updated regex to capture both the 9-digit and 8-digit numbers
+            if (preg_match('/DuitNow Reference No.*?(\d{9})\s(\d{8})/i', $correctedText, $matches)) {
+                logger()->info('Match:', ['text' => 'I found DuitNow Reference No.!']);
+                logger()->info('Full Match:', ['nine_digit' => $matches[1], 'eight_digit' => $matches[2]]);
+        
+                // Return only the 8-digit part
+                return $matches[2];
+            }
+        }
+        else if (strpos($text, 'Maybank') !== false) {
+            logger()->info('Match:', ['text' => 'I found MAYBANK!']);
+            // Adjusted regex to allow flexible spacing and ensure it captures the correct ID
+            if (preg_match('/Reference I D.*?(\d{8})/i', $text, $matches)) {
+                logger()->info('Match:', ['text' => 'I found Reference I D!']);
+                return $matches[1];
+            }
+            else if (preg_match('/Reference ID.*?(\d{8})/i', $text, $matches)) {
+                logger()->info('Match:', ['text' => 'I found Reference ID!']);
+                return $matches[1];
+            }
+        }
+        else if (strpos($text, 'RHB') !== false) {
+            logger()->info('Match:', ['text' => 'I found RHB!']);
+            if (preg_match('/(\d{8}RHBBMYKL[\w\d]+QR[\w\d]+)/i', $text, $matches)) {
+                return $matches[1];
+            }
+        }
+        else if (strpos($correctedText, 'Wallet') !== false) {
+            logger()->info('Match:', ['text' => 'I found TNG!']);
+            if (preg_match('/(\d{8}TNGDMYNB\d{4}QR)\s*Transaction No\.\s*([\w\d]+)/i', $correctedText, $matches)) {
+                return $matches[1] . $matches[2];
+            }
+            else if (preg_match('/Transaction No\.\s*(.+)/i', $correctedText, $matches)) {
+                $allTextAfterTransactionNo = $matches[1]; // Capture all text after "Transaction No."
+                
+                // Split the captured text into words and return the last valid alphanumeric word
+                $segments = preg_split('/\s+/', trim($allTextAfterTransactionNo)); // Split by spaces
+                $lastSegment = end($segments); // Get the last segment
+        
+                logger()->info('Extracted Segments:', ['segments' => $segments]);
+                logger()->info('Extracted Reference ID:', ['reference_id' => $lastSegment]);
+        
+                return $lastSegment; // Return only the last valid segment
+            }
+        }
+        else if (strpos($text, 'PUBLIC BANK') !== false) {
+            logger()->info('Match:', ['text' => 'I found PUBLIC!']);
+            if (preg_match('/DuitNow QR Ref No.*?(\d{8})/i', $text, $matches)) {
+                logger()->info('Match:', ['text' => 'I found DuitNow QR Ref No.!']);
+                return $matches[1];
+            }
+        }
+        else{
+            $patterns = [
+                '/Reference ID\s*[\r\n]?\s*(\w+)/i',          // Matches 'Reference ID'
+                '/Transaction No.\s*[\r\n]?\s*(\w+)/i',       // Matches 'Transaction No.'
+                '/Reference No.\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference No.'
+                '/Reference Number\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference Number'
+            ];
+        
+            // Iterate through each pattern to find a match
+            foreach ($patterns as $pattern) {
+                if (preg_match($pattern, $text, $matches)) {
+                    return $matches[1]; // Return the matched reference number
+                }
+            }
+        }
         return null; // Fallback if no match is found
     }
-    
+
     private function extractDate($text) {
+        $correctedText = str_replace(['I', 'S'], ['1', '5'], $text);
         // Define multiple regex patterns to handle different date formats
         $patterns = [
             // Pattern for formats like '15 Oct 2024 05:03 pm' or '28 Sep 2024, 4:13 PM'
@@ -178,7 +266,7 @@ class TransactionController extends Controller
     
         // Iterate over the patterns and attempt to match the text
         foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $text, $matches)) {
+            if (preg_match($pattern, $correctedText, $matches)) {
                 $dateString = $matches[1]; // Get the matched date
     
                 // Try different formats to convert to 'Y-m-d' format (e.g., 2024-10-06)

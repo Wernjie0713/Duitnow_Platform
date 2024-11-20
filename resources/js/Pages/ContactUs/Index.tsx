@@ -26,7 +26,7 @@ export default function Index({ auth, messages, adminMessages, isAdmin }) {
                     <form onSubmit={submit}>
                         <textarea
                             value={data.message}
-                            placeholder="Please describe the issue you are facing in detail."
+                            placeholder="Please describe the issue you are facing in detail. Feel free to ask, your message will not be seen by others. Only the admin can see and reply."
                             className="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
                             onChange={e => setData('message', e.target.value)}
                         ></textarea>
@@ -38,7 +38,7 @@ export default function Index({ auth, messages, adminMessages, isAdmin }) {
                 {!isAdmin && (
                     <div className="mt-6 bg-white shadow-sm rounded-lg divide-y">
                         {messages.map(message =>
-                            <Message key={message.id} message={message} />
+                            <Message key={message.id} message={message} isAdmin={isAdmin} />
                         )}
                     </div>
                 )}
@@ -46,7 +46,7 @@ export default function Index({ auth, messages, adminMessages, isAdmin }) {
                 {isAdmin && (
                     <div className="mt-6 bg-white shadow-sm rounded-lg divide-y">
                         {adminMessages.map(message =>
-                            <Message key={message.id} message={message} />
+                            <Message key={message.id} message={message} isAdmin={isAdmin}/>
                         )}
                     </div>
                 )}

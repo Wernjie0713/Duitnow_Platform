@@ -19,7 +19,7 @@ class ProfileUpdateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
             'matric_no' => ['required', 'string', 'uppercase', Rule::unique(User::class)->ignore($this->user()->id)],
-            'duitnow_id' => ['required', 'string', 'max:11', Rule::unique(User::class)->ignore($this->user()->id)],
+            'duitnow_id' => ['required', 'string', 'max:20', Rule::unique(User::class)->ignore($this->user()->id)],
             'campus' => ['required', 'string'],
             'faculty' => ['required', 'string'],
             'phone_no' => ['required', 'string', 'max:15', Rule::unique(User::class)->ignore($this->user()->id)],

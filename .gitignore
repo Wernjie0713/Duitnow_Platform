@@ -1,0 +1,36 @@
+
+.env.example
+
+# Ignore node_modules folder
+node_modules/
+
+tests/
+
+vendor/
+
+.editorconfig
+
+componets
+
+composer.lock
+
+package
+
+package-lock
+
+phpunit
+
+postcss.config
+
+README
+
+tailwind.config
+
+tsconfig
+
+vendor
+
+vite.config
+
+# Ignore specific file
+secret-config.json

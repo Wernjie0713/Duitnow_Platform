@@ -21,7 +21,7 @@ class TransactionController extends Controller
     {
         if(Auth::user()->cannot('manage-transactions'))
         {
-            abort(403, 'Unauthorized access.');                       
+            abort(403, 'Unauthorized access.');
         }
         else{
             return Inertia::render('Transactions/Index',[
@@ -55,7 +55,7 @@ class TransactionController extends Controller
         $transaction->amount = $request->amount;
         $transaction->transaction_type = $request->transaction_type;
         $transaction->image_url = $request->image_url;
-        
+
         // Save the transaction to the database
         $transaction->save();
 
@@ -110,7 +110,7 @@ class TransactionController extends Controller
 				$reference_id = $this->extractReferenceID($extractedText);
 				$date = $this->extractDate($extractedText);
 				$amount = $this->extractAmount($extractedText);
-                $transaction_type = $this->extractTransactionType($extractedText);  
+                $transaction_type = $this->extractTransactionType($extractedText);
 
 				// Log the full extracted text for debugging purposes
 				logger()->info('Extracted Text:', ['text' => $extractedText]);
@@ -138,26 +138,7 @@ class TransactionController extends Controller
 
 		return back()->withErrors(['image_url' => 'Image upload failed']);
 	}
-    
-    // private function extractReferenceID($text) {
-    //     // Regular expressions for different cases of reference IDs
-        // $patterns = [
-        //     '/Reference ID\s*[\r\n]?\s*(\w+)/i',          // Matches 'Reference ID'
-        //     '/Transaction No.\s*[\r\n]?\s*(\w+)/i',       // Matches 'Transaction No.'
-        //     '/Reference No.\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference No.'
-		// 	'/Reference Number\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference Number'
-        //     '/OCTO Reference No.\s*[\r\n]?\s*(\w+)/i',    // Specific for CIMB 'OCTO Reference No.'
-        // ];
-    
-        // // Iterate through each pattern to find a match
-        // foreach ($patterns as $pattern) {
-        //     if (preg_match($pattern, $text, $matches)) {
-        //         return $matches[1]; // Return the matched reference number
-        //     }
-        // }
-    
-    //     return null; // Fallback if no match is found
-    // }
+
     private function extractReferenceID($text) {
         // Preprocess the text
         $text = str_replace(["\n", "\r"], ' ', $text); // Remove line breaks
@@ -167,7 +148,7 @@ class TransactionController extends Controller
         // Adjust regex for OCR misinterpretations (allow `O` for `0`, etc.)
         $correctedText = str_replace(['I', 'O', 'S'], ['1', '0', '5'], $text);
         logger()->info('Corrected OCR Text:', ['text' => $correctedText]);
-        
+
         if (strpos($correctedText, 'BANK@AM') !== false) {
             logger()->info('Match:', ['text' => 'I found it!']);
             if (preg_match('/Reference No.\s*[\r\n]?\s*(\w+)/i', $correctedText, $matches)) {
@@ -176,12 +157,12 @@ class TransactionController extends Controller
         }
         else if (strpos($correctedText, '0CT0') !== false) {
             logger()->info('Match:', ['text' => 'I found it!']);
-        
+
             // Updated regex to capture both the 9-digit and 8-digit numbers
             if (preg_match('/DuitNow Reference No.*?(\d{9})\s(\d{8})/i', $correctedText, $matches)) {
                 logger()->info('Match:', ['text' => 'I found DuitNow Reference No.!']);
                 logger()->info('Full Match:', ['nine_digit' => $matches[1], 'eight_digit' => $matches[2]]);
-        
+
                 // Return only the 8-digit part
                 return $matches[2];
             }
@@ -211,21 +192,70 @@ class TransactionController extends Controller
             }
             else if (preg_match('/Transaction No\.\s*(.+)/i', $correctedText, $matches)) {
                 $allTextAfterTransactionNo = $matches[1]; // Capture all text after "Transaction No."
-                
+
                 // Split the captured text into words and return the last valid alphanumeric word
                 $segments = preg_split('/\s+/', trim($allTextAfterTransactionNo)); // Split by spaces
                 $lastSegment = end($segments); // Get the last segment
-        
+
                 logger()->info('Extracted Segments:', ['segments' => $segments]);
                 logger()->info('Extracted Reference ID:', ['reference_id' => $lastSegment]);
-        
+
                 return $lastSegment; // Return only the last valid segment
+            }
+        }
+        else if (strpos($text, 'HLB') !== false) {
+            logger()->info('Match:', ['text' => 'I found HLB!']);
+            // Adjusted regex to handle spaces and extract all parts correctly
+            if (preg_match('/(\d{8}HLBBMYKLO)\s*(\d{3,4})QR(\d{8})/i', $text, $matches)) {
+                logger()->info('Match:', ['text' => 'I found HLBBMYKLO!']);
+                logger()->info('Full Match:', ['first_part' => $matches[1], 'second_part' => $matches[2], 'third_part' => $matches[3]]);
+
+                // Combine the parts and remove any spaces
+                $referenceID = str_replace(' ', '', $matches[1] . $matches[2] . 'QR' . $matches[3]);
+
+                return $referenceID;
+            }
+            else if (preg_match('/(\d{8}HLBBMYKL0)\s*(\d{3,4})QR(\d{8})/i', $text, $matches)) {
+                logger()->info('Match:', ['text' => 'I found HLBBMYKLO!']);
+                logger()->info('Full Match:', ['first_part' => $matches[1], 'second_part' => $matches[2], 'third_part' => $matches[3]]);
+
+                // Combine the parts and remove any spaces
+                $referenceID = str_replace(' ', '', $matches[1] . $matches[2] . 'QR' . $matches[3]);
+
+                return $referenceID;
+            }
+            else if (preg_match('/(\d{8}HLBBMYKLO)\s*(\d{3,4})R\s*M(\d{8})/i', $text, $matches)) {
+                logger()->info('Match:', ['text' => 'I found HLBBMYKLO!']);
+                logger()->info('Full Match:', ['first_part' => $matches[1], 'second_part' => $matches[2], 'third_part' => $matches[3]]);
+
+                // Combine the parts and remove any spaces
+                $referenceID = str_replace(' ', '', $matches[1] . $matches[2] . 'QR' . $matches[3]);
+
+                return $referenceID;
+            }
+            else if (preg_match('/(\d{8}HLBBMYKL0)\s*(\d{3,4})R\s*M(\d{8})/i', $text, $matches)) {
+                logger()->info('Match:', ['text' => 'I found HLBBMYKLO!']);
+                logger()->info('Full Match:', ['first_part' => $matches[1], 'second_part' => $matches[2], 'third_part' => $matches[3]]);
+
+                // Combine the parts and remove any spaces
+                $referenceID = str_replace(' ', '', $matches[1] . $matches[2] . 'QR' . $matches[3]);
+
+                return $referenceID;
             }
         }
         else if (strpos($text, 'PUBLIC BANK') !== false) {
             logger()->info('Match:', ['text' => 'I found PUBLIC!']);
             if (preg_match('/DuitNow QR Ref No.*?(\d{8})/i', $text, $matches)) {
                 logger()->info('Match:', ['text' => 'I found DuitNow QR Ref No.!']);
+                return $matches[1];
+            }
+        }
+        else if (strpos($text, 'alliance') !== false) {
+            logger()->info('Match:', ['text' => 'I found alliance!']);
+
+            // Regex to capture the reference number regardless of spacing or separators
+            if (preg_match('/DuitNow QR Reference.*?Number.*?(\d{8})/is', $text, $matches)) {
+                logger()->info('Match:', ['text' => 'I found DuitNow QR Reference Number!']);
                 return $matches[1];
             }
         }
@@ -236,7 +266,7 @@ class TransactionController extends Controller
                 '/Reference No.\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference No.'
                 '/Reference Number\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference Number'
             ];
-        
+
             // Iterate through each pattern to find a match
             foreach ($patterns as $pattern) {
                 if (preg_match($pattern, $text, $matches)) {
@@ -253,24 +283,27 @@ class TransactionController extends Controller
         $patterns = [
             // Pattern for formats like '15 Oct 2024 05:03 pm' or '28 Sep 2024, 4:13 PM'
            '/(\d{1,2}\s*\w{3,}\s*\d{4})\s*,?\s*\d{1,2}:\d{2}\s*(AM|PM)?/i',
-    
+
             // Pattern for formats like '15 Oct 2024'
             '/(\d{1,2}\s*\w{3,}\s*\d{4})/i',
-    
+
             // Pattern for formats like '16/10/2024' or '16-10-2024'
             '/(\d{1,2}[-\/]\d{1,2}[-\/]\d{4})/i',
+
+             // Pattern for formats like '22-Nov-2024'
+            '/(\d{1,2}-\w{3,}-\d{4})/i',
 
             // New pattern for specific CIMB format (e.g., '15 Oct 2024 05:05:14 PM')
             '/(\d{1,2}\s*\w{3,}\s*\d{4})\s*(\d{1,2}:\d{2}:\d{2}\s*(AM|PM)?)/i',
         ];
-    
+
         // Iterate over the patterns and attempt to match the text
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $correctedText, $matches)) {
                 $dateString = $matches[1]; // Get the matched date
-    
+
                 // Try different formats to convert to 'Y-m-d' format (e.g., 2024-10-06)
-                $formats = ['d M Y', 'd/m/Y', 'd-m-Y'];
+                $formats = ['d M Y', 'd/m/Y', 'd-m-Y', 'd-M-Y'];
                 foreach ($formats as $format) {
                     try {
                         $date = DateTime::createFromFormat($format, $dateString);
@@ -284,14 +317,21 @@ class TransactionController extends Controller
                 }
             }
         }
-    
+
         // If no pattern matches or parsing fails, return null
         return null;
     }
-    
+
     private function extractAmount($text) {
+        $text = str_replace(["\n", "\r"], ' ', $text); // Remove line breaks
+        $text = preg_replace('/\s+/', ' ', $text); // Replace multiple spaces with a single space
 		// Correct common OCR misinterpretations for numbers
 		$text = str_replace(['I', 'O'], ['1', '0'], $text);
+
+        // Normalise spacing issues for (MYR)
+        $text = preg_replace('/\(\s*MY\s*R\s*\)/iu', '(MYR)', $text);
+
+        logger()->info('Normalized Text for Amount Extraction:', ['text' => $text]);
 
 		// Adjust regex to allow optional space or hyphen between "RM" and the amount
 		if (preg_match('/(?<!\S)-?\s*RM\s*([0-9]+(?:\.[0-9]{2})?)/iu', $text, $matches)) {
@@ -303,6 +343,20 @@ class TransactionController extends Controller
 			return $matches[1]; // Return the amount after "MYR"
 		}
 
+        // New pattern to match "1.00 MYR" or similar formats
+        if (preg_match('/([0-9]+(?:\.[0-9]{2})?)\s*MYR/iu', $text, $matches)) {
+            return $matches[1]; // Return the amount before "MYR"
+        }
+
+        if (preg_match('/\(MYR\)\s*([0-9]+(?:\.[0-9]{2})?)/iu', $text, $matches)) {
+            return $matches[1]; // Format: (MYR) 7.00
+        }
+
+        if (preg_match('/\(MYR\).*?([0-9]+(?:\.[0-9]{2})?)/iu', $text, $matches)) {
+            logger()->info('Match:', ['text' => 'I found MYR!']);
+            return $matches[1]; // Format: (MYR) 7.00
+        }
+
 		return null; // If neither pattern matches
 	}
 
@@ -313,16 +367,16 @@ class TransactionController extends Controller
             'DuitNow QR TNGo', // similar variations, prioritize if any
             'DuitNow QR',      // more generic
             'Payment',         // generic payment term
-            'Transfer', 
+            'Transfer',
             'QR Payment',
         ];
-    
+
         // Try to find the "Transaction Type" label and capture data nearby
         $pattern = '/Transaction Type[\s\S]{0,40}(.*?)(\s|$)/i';
-    
+
         if (preg_match($pattern, $text, $matches)) {
             $possibleType = trim($matches[1]);
-    
+
             // Check if the extracted type matches any known types
             foreach ($transactionTypes as $type) {
                 if (stripos($possibleType, $type) !== false) {
@@ -330,17 +384,17 @@ class TransactionController extends Controller
                 }
             }
         }
-    
+
         // Fallback approach: if "Transaction Type" is not nearby, search the whole text
         foreach ($transactionTypes as $type) {
             if (stripos($text, $type) !== false) {
                 return $type;
             }
         }
-    
+
         return null; // If no valid transaction type is found
-    }    
-    
+    }
+
     public function show(Request $request): \Inertia\Response
     {
         $imageUrl = $request->session()->get('image_url');
@@ -359,11 +413,11 @@ class TransactionController extends Controller
     private function updateUserCounts(Transaction $transaction)
     {
         $user = $transaction->user;
-        
+
         // Event start and end dates
         $eventStartDate = Carbon::create(2024, 11, 10); // 10th November 2024
         $eventEndDate = Carbon::create(2024, 12, 31);  // 31st December 2024
-        
+
         // Parse transaction date
         $transactionDate = Carbon::parse($transaction->date);
 
@@ -374,7 +428,7 @@ class TransactionController extends Controller
 
             // Calculate week number (1-based)
             $weekNumber = ceil(($daysSinceEventStart + 1) / 7);
-            
+
             $transactionMonth = $transactionDate->month;
             $currentMonth = Carbon::now()->month;
             // Check if the transaction week is before the current week

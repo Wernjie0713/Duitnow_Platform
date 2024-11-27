@@ -25,6 +25,15 @@ class DatabaseSeeder extends Seeder
 
         $admin->assign(['admin']);
 
+        $user = User::factory()->create([
+            'name' => 'User',
+            'email' => 'user@example.com',
+            'email_verified_at' => now(),
+            'is_profile_complete' => true,
+        ]);
+
+        $user->assign(['user']);
+
         // Define abilities
         BouncerFacade::ability()->firstOrCreate([
             'name' => 'manage-transactions',

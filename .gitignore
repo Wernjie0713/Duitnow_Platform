@@ -10,27 +10,29 @@ vendor/
 
 .editorconfig
 
-componets
+components.json
 
 composer.lock
 
-package
+package.json
 
-package-lock
+package-lock.json
 
-phpunit
+phpunit.xml
 
-postcss.config
+postcss.config.js
 
-README
+README.md
 
-tailwind.config
+tailwind.config.js
 
-tsconfig
+tsconfig.json
 
-vendor
+vendor.zip
 
-vite.config
+vite.config.js
+
+.env
 
 # Ignore specific file
 secret-config.json

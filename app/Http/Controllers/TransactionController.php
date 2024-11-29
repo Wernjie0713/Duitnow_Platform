@@ -269,6 +269,15 @@ class TransactionController extends Controller
                 return $matches[1];
             }
         }
+        else if (strpos($text, 'Al-Awfar') !== false) {
+            logger()->info('Match:', ['text' => 'I found Al-Awfar!']);
+
+            // Regex to capture the reference number regardless of spacing or separators
+            if (preg_match('/DuitNow\s*QR\s*Ref\s*No\s*[:\-]?\s*(\d{8})/i', $text, $matches)) {
+                logger()->info('Match:', ['text' => 'I found DuitNow QR Ref No:!']);
+                return $matches[1];
+            }
+        }
         else{
             $patterns = [
                 '/Reference ID\s*[\r\n]?\s*(\w+)/i',          // Matches 'Reference ID'
@@ -276,6 +285,8 @@ class TransactionController extends Controller
                 '/Reference No.\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference No.'
                 '/Reference Number\s*[\r\n]?\s*(\w+)/i',         // Matches 'Reference Number'
             ];
+
+            logger()->info('Match:', ['text' => 'I found from else!']);
 
             // Iterate through each pattern to find a match
             foreach ($patterns as $pattern) {

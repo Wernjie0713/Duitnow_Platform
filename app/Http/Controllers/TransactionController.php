@@ -181,6 +181,16 @@ class TransactionController extends Controller
         }
         else if (strpos($text, 'RHB') !== false) {
             logger()->info('Match:', ['text' => 'I found RHB!']);
+
+            if (preg_match('/(\d{8}RHBBMYKL[\w\d]+QR\s*\d{3}\s*\d{5})/i', $text, $matches)) {
+                logger()->info('Match:', ['text' => 'I found RHBBMYKL with specific 8-digit handling!']);
+
+                // Remove spaces from the captured string
+                $referenceID = str_replace(' ', '', $matches[1]);
+
+                return $referenceID;
+            }
+
             if (preg_match('/(\d{8}RHBBMYKL[\w\d]+QR[\w\d]+)/i', $text, $matches)) {
                 return $matches[1];
             }

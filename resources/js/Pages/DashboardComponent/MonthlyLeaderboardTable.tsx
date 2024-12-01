@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import { Link } from '@inertiajs/react';
 import { Button } from '@/Components/ui/button';
-  
+
 export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, selectedNumber, links, selectedTime, monthlyAll }) {
     if (!users || users.length === 0) {
         return (
@@ -48,11 +48,11 @@ export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, 
                 case 'Nov':
                     return 'nov_count';
                 case 'Dec':
-                    return 'dec_count'; 
+                    return 'dec_count';
                 default:
                     return 'total_count'; // Default fallback
             }
-            
+
         })();
 
         const duration = (() => {
@@ -64,7 +64,7 @@ export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, 
                 default:
                     return 'September 1st, 2024 (12:00 a.m) - September 30th, 2024 (11:59 p.m)'; // Default fallback
             }
-            
+
         })();
 
         const title = (() => {
@@ -76,7 +76,7 @@ export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, 
                 default:
                     return 'September Top 10'; // Default fallback
             }
-            
+
         })();
 
         setMonthlyCount(column);
@@ -92,13 +92,13 @@ export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, 
                     case 11:
                         return 'nov_count';
                     case 12:
-                        return 'dec_count'; 
+                        return 'dec_count';
                     default:
                         return 'oct_count'; // Default fallback
                 }
-                
+
             })();
-    
+
             const duration = (() => {
                 switch (selectedTime) {
                     case 11:
@@ -108,9 +108,9 @@ export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, 
                     default:
                         return 'October 6th, 2024 (12:00 a.m) - October 31th, 2024 (11:59 p.m)'; // Default fallback
                 }
-                
+
             })();
-    
+
             const title = (() => {
                 switch (selectedTime) {
                     case 11:
@@ -120,9 +120,9 @@ export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, 
                     default:
                         return 'October Top 10'; // Default fallback
                 }
-                
+
             })();
-    
+
             setMonthlyCount(column);
             setMonthlyDuration(duration);
             setMonthlyTitle(title);

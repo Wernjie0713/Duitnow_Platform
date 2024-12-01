@@ -21,18 +21,24 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
             (
                 <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                     <div className='bg-white rounded-lg shadow p-4 sm:p-4 mt-2 text-center mb-8'>
-                    <p className="text-green-500 font-bold text-lg">
-                        🎄 December Ranking Event is Here! 🎄
-                    </p>
-                    <p className="text-gray-700 font-medium mt-2">
-                        <strong>Event Duration:</strong> Refer to the Weekly Ranking Table for specific weeks.
-                    </p>
-                    <p className="text-gray-700 font-medium mt-2">
-                        <strong>Prizes:</strong> Weekly Top 10 users will win rewards! Note: Prizes differ from November Monthly Ranking rewards. 🎁
-                    </p>
-                    <p className="text-gray-700 font-medium mt-2">
-                        <strong>Eligibility:</strong> Complete at least <span className="text-blue-600 font-semibold">50 transactions</span> in a week to qualify.
-                    </p>
+                        <p className="text-green-500 font-bold text-lg">
+                            🎄 December Ranking Event is Here! 🎄
+                        </p>
+                        <p className="text-gray-700 font-medium mt-2">
+                            Compete every week to climb the ranks and win exciting prizes! 🎉
+                        </p>
+                        <p className="text-gray-700 font-medium mt-2">
+                            <strong>Event Duration:</strong> Refer to the Weekly Ranking Table for specific weeks.
+                        </p>
+                        <p className="text-gray-700 font-medium mt-2">
+                            <strong>Prizes:</strong> Weekly Top 10 users will win rewards! Note: Prizes differ from November Monthly Ranking rewards. 🎁
+                        </p>
+                        <p className="text-gray-700 font-medium mt-2">
+                            <strong>Eligibility:</strong> Minimum <span className="text-blue-600 font-semibold">80 transactions</span> for Top 3 positions, and <span className="text-blue-600 font-semibold">40 transactions</span> for Top 10 positions.
+                        </p>
+                        <p className="text-gray-700 font-medium mt-2">
+                            <strong>Rule:</strong> Weekly Top 3 winners cannot participate in Top 3 in subsequent weeks but can aim for positions 4 to 10.
+                        </p>
                         <p className="text-sm mt-4 text-blue-600">
                             For more details, please refer to the <TermsAndCondition />
                         </p>

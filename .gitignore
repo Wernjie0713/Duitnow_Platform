@@ -34,5 +34,7 @@ vite.config.js
 
 .env
 
+public/hot.
+
 # Ignore specific file
 secret-config.json

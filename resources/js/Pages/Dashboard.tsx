@@ -37,7 +37,9 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
                             <strong>Eligibility:</strong> Minimum <span className="text-blue-600 font-semibold">80 transactions</span> for Top 3 positions, and <span className="text-blue-600 font-semibold">40 transactions</span> for Top 10 positions.
                         </p>
                         <p className="text-gray-700 font-medium mt-2">
-                            <strong>Rule:</strong> Weekly Top 3 winners cannot participate in Top 3 in subsequent weeks but can aim for positions 4 to 10.
+                            <strong className='text-red-900'>Rule updated:</strong> 
+                            - Weekly Top 3 winners must aim for a <strong>higher position</strong> or 4 to 10 in subsequent weeks. <br />
+                            - Top 1 can only win once in the event and will qualify for 4 to 10 prizes in subsequent weeks.
                         </p>
                         <p className="text-sm mt-4 text-blue-600">
                             For more details, please refer to the <TermsAndCondition />

@@ -450,6 +450,11 @@ class TransactionController extends Controller
             // Calculate week number (1-based)
             $weekNumber = ceil(($daysSinceEventStart + 1) / 7);
 
+            // Get the current week number based on today's date
+            $daysSinceEventStartToday = $eventStartDate->diffInDays(Carbon::now());
+            $currentWeekNumber = ceil(($daysSinceEventStartToday + 1) / 7);
+            
+            
             $transactionMonth = $transactionDate->month;
             $currentMonth = Carbon::now()->month;
             // Check if the transaction week is before the current week
@@ -460,7 +465,13 @@ class TransactionController extends Controller
                     ]);
                 }
             else{
-                // Ensure the week number is valid (1-8)
+                if ($weekNumber < $currentWeekNumber) {
+                    throw ValidationException::withMessages([
+                        'date' => ['You cannot add transactions for past weeks.'],
+                    ]);
+                }
+                else{
+                    // Ensure the week number is valid (1-8)
                     if ($weekNumber >= 1 && $weekNumber <= 8) {
                         $weekColumn = 'week' . $weekNumber . '_count'; // e.g., week1_count, week2_count, etc.
                         $user->{$weekColumn} += 1; // Increment the specific week's count
@@ -484,7 +495,8 @@ class TransactionController extends Controller
 
                     // Save the user model with the updated counts
                     $user->save();
-                    }
+                }
             }
+        }
     }
 }

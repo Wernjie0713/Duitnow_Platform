@@ -451,7 +451,7 @@ class TransactionController extends Controller
             $weekNumber = ceil(($daysSinceEventStart + 1) / 7);
 
             // Get the current week number based on today's date
-            $daysSinceEventStartToday = $eventStartDate->diffInDays(Carbon::now());
+            $daysSinceEventStartToday = Carbon::now()->diffInDays($eventStartDate);
             $currentWeekNumber = ceil(($daysSinceEventStartToday + 1) / 7);
             
             

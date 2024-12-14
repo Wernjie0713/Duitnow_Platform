@@ -48,3 +48,4 @@ vendor.zip
 postcss.config.js
 phpunit.xml
 components.json
+public/hot

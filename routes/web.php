@@ -57,7 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // $currentDate = Carbon::create(2024, 11, 12);
         if ($currentDate->between($eventStartDate, $eventEndDate)) {
             // Calculate the number of days since the start of the event
-            $daysSinceEventStart = $eventStartDate->diffInDays($currentDate);
+            $daysSinceEventStart = $currentDate->diffInDays($eventStartDate);
 
             // Calculate week number (1-based)
             $weekNumber = ceil(($daysSinceEventStart + 1) / 7);

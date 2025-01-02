@@ -43,7 +43,7 @@ class DashboardController extends Controller
             ->select('name', 'email', 'matric_no', 'duitnow_id', 'phone_no', 'faculty', 'campus', 'total_count')
             ->get();
 
-        return $this->streamCSV($data, 'cumulative_leaderboard.csv', ['Name', 'Email', 'Matric No', 'Phone No.', 'DuitNow ID', 'Faculty', 'Campus', 'Transaction Count']);
+        return $this->streamCSV($data, 'cumulative_leaderboard.csv', ['Name', 'Email', 'Matric No', 'DuitNow ID', 'Phone No.', 'Faculty', 'Campus', 'Transaction Count']);
     }
  
     public function exportWeeklyLeaderboard(Request $request)
@@ -60,7 +60,7 @@ class DashboardController extends Controller
 
             $callback = function() use ($data, $weekColumn) {
                 $file = fopen('php://output', 'w');
-                fputcsv($file, ['Name', 'Email', 'Matric No', 'Phone No.', 'DuitNow ID', 'Faculty', 'Campus', 'Transaction Count']);
+                fputcsv($file, ['Name', 'Email', 'Matric No', 'DuitNow ID', 'Phone No.', 'Faculty', 'Campus', 'Transaction Count']);
 
                 foreach ($data as $row) {
                     fputcsv($file, [$row->name, $row->email, $row->matric_no, $row->duitnow_id, $row->phone_no, $row->faculty, $row->campus, $row->$weekColumn]);

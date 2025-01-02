@@ -84,11 +84,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
                             ->orderBy('name', 'asc')
                             ->paginate(10),
 
+            'last_month' => User::where('id', '!=', 1)
+                            ->where('is_profile_complete', true)
+                            ->orderBy('dec_count', 'desc')
+                            ->orderBy('name', 'asc')
+                            ->paginate(10),
+
             'weekly' => User::where('id', '!=', 1)
                             ->where('is_profile_complete', true)
                             ->orderBy($weekColumn, 'desc')
                             ->orderBy('name', 'asc')
                             ->paginate(10),
+
+            'last_week' => User::where('id', '!=', 1)
+                            ->where('is_profile_complete', true)
+                            ->orderBy('week7_count', 'desc')
+                            ->orderBy('name', 'asc')
+                            ->paginate(10),
+                            
 
             'cumulativeAll' => User::where('id', '!=', 1)
                                 ->where('is_profile_complete', true)

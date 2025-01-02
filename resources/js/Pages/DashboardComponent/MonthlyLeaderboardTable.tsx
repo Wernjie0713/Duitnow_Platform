@@ -40,13 +40,14 @@ export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, 
 
     // Get the current month in JavaScript
     useEffect(() => {
-        const currentMonth = new Date().toLocaleString('en-US', { month: 'short' }); // "Oct", "Nov", "Dec"
+        // const currentMonth = new Date().toLocaleString('en-US', { month: 'short' }); // "Oct", "Nov", "Dec"
+        const currentMonth = 'Dec'; // Hardcoded for testing purposes
 
         // Map the current month to the corresponding database column
         const column = (() => {
             switch (currentMonth) {
-                case 'Nov':
-                    return 'nov_count';
+                // case 'Nov':
+                //     return 'nov_count';
                 case 'Dec':
                     return 'dec_count';
                 default:
@@ -57,10 +58,10 @@ export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, 
 
         const duration = (() => {
             switch (currentMonth) {
-                case 'Nov':
-                    return 'November 1st, 2024 (12:00 a.m) - November 30th, 2024 (11:59 p.m)';
+                // case 'Nov':
+                //     return 'November 1st, 2024 (12:00 a.m) - November 30th, 2024 (11:59 p.m)';
                 case 'Dec':
-                    return 'December 1st, 2024 (12:00 a.m) - December 31th, 2024 (11:59 p.m)';
+                    return 'December 1st, 2024 (12:00 a.m) - December 28th, 2024 (11:59 p.m)';
                 default:
                     return 'September 1st, 2024 (12:00 a.m) - September 30th, 2024 (11:59 p.m)'; // Default fallback
             }
@@ -69,8 +70,8 @@ export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, 
 
         const title = (() => {
             switch (currentMonth) {
-                case 'Nov':
-                    return 'November Top 10';
+                // case 'Nov':
+                //     return 'November Top 10';
                 case 'Dec':
                     return 'December Top 10';
                 default:
@@ -104,7 +105,7 @@ export default function MonthlyLeaderboardTable({ users, current_user, isAdmin, 
                     case 11:
                         return 'November 1st, 2024 (12:00 a.m) - November 30th, 2024 (11:59 p.m)';
                     case 12:
-                        return 'December 1st, 2024 (12:00 a.m) - December 31th, 2024 (11:59 p.m)';
+                        return 'December 1st, 2024 (12:00 a.m) - December 28th, 2024 (11:59 p.m)';
                     default:
                         return 'October 6th, 2024 (12:00 a.m) - October 31th, 2024 (11:59 p.m)'; // Default fallback
                 }

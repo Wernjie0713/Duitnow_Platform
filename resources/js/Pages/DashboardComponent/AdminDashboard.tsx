@@ -85,7 +85,6 @@ export default function AdminDashboard({ weekly, monthly, cumulative, facultyRan
                                 <SelectItem value="5">Week 5</SelectItem>
                                 <SelectItem value="6">Week 6</SelectItem>
                                 <SelectItem value="7">Week 7</SelectItem>
-                                <SelectItem value="8">Week 8</SelectItem>
                             </SelectContent>
                         </Select>
                     )}
@@ -154,7 +153,7 @@ export default function AdminDashboard({ weekly, monthly, cumulative, facultyRan
                             isAdmin={isAdmin} 
                             selectedNumber={selectedNumber} 
                             title="Cumulative Top 10" 
-                            duration="November 10th, 2024 (12:00 a.m) - December 31th, 2024 (11:59 p.m)"
+                            duration="November 10th, 2024 (12:00 a.m) - December 28th, 2024 (11:59 p.m)"
                             cumulativeAll={cumulativeAll}
                         />
                     )

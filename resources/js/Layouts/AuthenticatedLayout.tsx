@@ -32,12 +32,12 @@ export default function Authenticated({ header, children, isAdmin }: PropsWithCh
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>
                                     Dashboard
                                 </NavLink>
-                                {!isAdmin  &&
+                                {/* {!isAdmin  &&
                                 
                                 (<NavLink href={route('transactions.index')} active={route().current('transactions.index')}>
                                     Transaction
                                 </NavLink>)
-                                }
+                                } */}
 
                                 <NavLink href={route('contactus.index')} active={route().current('contactus.index')}>
                                     Contact Us
@@ -115,12 +115,12 @@ export default function Authenticated({ header, children, isAdmin }: PropsWithCh
                         <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
                             Dashboard
                         </ResponsiveNavLink>
-                        {!isAdmin
+                        {/* {!isAdmin
                             &&
                             (<ResponsiveNavLink href={route('transactions.index')} active={route().current('transactions.index')}>
                                 Transaction
                             </ResponsiveNavLink>)
-                        }
+                        } */}
                         <ResponsiveNavLink href={route('contactus.index')}>Contact Us</ResponsiveNavLink>
                     </div>
 

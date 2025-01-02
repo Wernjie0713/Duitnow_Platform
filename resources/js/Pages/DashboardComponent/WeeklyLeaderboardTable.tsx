@@ -43,7 +43,7 @@ export default function WeeklyLeaderboardTable({ users, current_user, isAdmin, s
 
     // Get the current month in JavaScript
     useEffect(() => {
-        const currentDate = dayjs();
+        const currentDate = dayjs('2024-12-28');
         // const currentDate = dayjs('2024-11-12');
 
         // Event start and end dates
@@ -55,6 +55,7 @@ export default function WeeklyLeaderboardTable({ users, current_user, isAdmin, s
             const daysSinceEventStart = currentDate.diff(eventStartDate, 'day');
 
             // Calculate week number (1-based)
+            // let weekNumber = Math.ceil((daysSinceEventStart + 1) / 7);
             let weekNumber = Math.ceil((daysSinceEventStart + 1) / 7);
 
             // Ensure the week number is valid (1-8)

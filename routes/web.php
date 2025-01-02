@@ -78,11 +78,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->orderBy('name', 'asc')
                     ->paginate(10),
 
-            'monthly' => User::where('id', '!=', 1)
-                            ->where('is_profile_complete', true)
-                            ->orderBy($monthlyOrderColumn, 'desc')
-                            ->orderBy('name', 'asc')
-                            ->paginate(10),
+            // 'monthly' => User::where('id', '!=', 1)
+            //                 ->where('is_profile_complete', true)
+            //                 ->orderBy($monthlyOrderColumn, 'desc')
+            //                 ->orderBy('name', 'asc')
+            //                 ->paginate(10),
 
             'last_month' => User::where('id', '!=', 1)
                             ->where('is_profile_complete', true)
@@ -90,11 +90,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
                             ->orderBy('name', 'asc')
                             ->paginate(10),
 
-            'weekly' => User::where('id', '!=', 1)
-                            ->where('is_profile_complete', true)
-                            ->orderBy($weekColumn, 'desc')
-                            ->orderBy('name', 'asc')
-                            ->paginate(10),
+            // 'weekly' => User::where('id', '!=', 1)
+            //                 ->where('is_profile_complete', true)
+            //                 ->orderBy($weekColumn, 'desc')
+            //                 ->orderBy('name', 'asc')
+            //                 ->paginate(10),
 
             'last_week' => User::where('id', '!=', 1)
                             ->where('is_profile_complete', true)
@@ -111,13 +111,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             'monthlyAll' => User::where('id', '!=', 1)
                                 ->where('is_profile_complete', true)
-                                ->orderBy($monthlyOrderColumn, 'desc')
+                                ->orderBy('dec_count', 'desc')
                                 ->orderBy('name', 'asc')
                                 ->get(),
 
             'weeklyAll' => User::where('id', '!=', 1)
                             ->where('is_profile_complete', true)
-                            ->orderBy($weekColumn, 'desc')
+                            ->orderBy('week7_count', 'desc')
                             ->orderBy('name', 'asc')
                             ->get(),
                             

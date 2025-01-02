@@ -61,7 +61,7 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
                             <CumulativeLeaderboardTable
                                 users={cumulative.data}
                                 title="Cumulative Top 10"
-                                duration="November 10th, 2024 (12:00 a.m) - December 31th, 2024 (11:59 p.m)"
+                                duration="November 10th, 2024 (12:00 a.m) - December 28th, 2024 (11:59 p.m)"
                                 current_user={current_user}
                                 isAdmin={isAdmin}
                                 links={cumulative.links}
@@ -71,14 +71,14 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
                         </div>
                     </div>
 
-                    <div className='bg-white rounded-lg shadow p-4 sm:p-4 mt-6 text-center'>
+                    {/* <div className='bg-white rounded-lg shadow p-4 sm:p-4 mt-6 text-center'>
                         <TermsAndCondition />
-                    </div>
+                    </div> */}
                 </div>
             )
             :
             (
-                <AdminDashboard current_user={current_user} cumulative={cumulative} facultyRanking={facultyRanking} weekly={weekly} monthly={monthly} isAdmin={isAdmin} weeklyAll={weeklyAll} monthlyAll={monthlyAll} cumulativeAll={cumulativeAll} transactions={transactions} />
+                <AdminDashboard current_user={current_user} cumulative={cumulative} facultyRanking={facultyRanking} weekly={last_week} monthly={last_month} isAdmin={isAdmin} weeklyAll={weeklyAll} monthlyAll={monthlyAll} cumulativeAll={cumulativeAll} transactions={transactions} />
             )}
         </AuthenticatedLayout>
     );

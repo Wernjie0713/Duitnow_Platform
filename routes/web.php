@@ -138,19 +138,19 @@ Route::middleware('auth', 'can:edit-profile')->group(function () {
 });
 
 // Define the resource route for transactions (index and store only)
-Route::resource('transactions', TransactionController::class)
-    ->only(['index', 'store'])
-    ->middleware(['auth', 'verified', 'can:manage-transactions']);
+// Route::resource('transactions', TransactionController::class)
+//     ->only(['index', 'store'])
+//     ->middleware(['auth', 'verified', 'can:manage-transactions']);
 
-// Add a separate route for showing the extracted text (confirmation page)
-Route::get('/transactions/show', [TransactionController::class, 'show'])
-    ->name('transactions.show')
-    ->middleware(['auth', 'verified', 'can:manage-transactions']);
+// // Add a separate route for showing the extracted text (confirmation page)
+// Route::get('/transactions/show', [TransactionController::class, 'show'])
+//     ->name('transactions.show')
+//     ->middleware(['auth', 'verified', 'can:manage-transactions']);
 
-// Add POST route to save confirmed transaction data
-Route::post('/transactions/confirm', [TransactionController::class, 'confirm'])
-    ->name('transactions.confirm')
-    ->middleware(['auth', 'verified', 'can:manage-transactions']);
+// // Add POST route to save confirmed transaction data
+// Route::post('/transactions/confirm', [TransactionController::class, 'confirm'])
+//     ->name('transactions.confirm')
+//     ->middleware(['auth', 'verified', 'can:manage-transactions']);
 
 Route::resource('contactus', ContactUsController::class)
 ->only(['index', 'store'])

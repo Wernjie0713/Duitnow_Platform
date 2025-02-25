@@ -8,7 +8,10 @@ import DashboardStats from './DashboardComponent/DashboardStats';
 import TermsAndCondition from './DashboardComponent/TermsAndCondition';
 import AdminDashboard from './DashboardComponent/AdminDashboard';
 
-export default function Dashboard({ cumulative, monthly, weekly, facultyRanking, current_user, isAdmin, cumulativeAll, monthlyAll, weeklyAll, transactions, last_week, last_month }) {
+export default function Dashboard({ cumulative, monthly, weekly, facultyRanking, current_user, isAdmin, cumulativeAll, monthlyAll, 
+    weeklyAll, transactions, last_week, last_month, total_nov_count, total_dec_count, total_cumulative_count,
+    campusDistribution, monthlyTransactions, lineChartData }) {
+    
     return (
         <AuthenticatedLayout
             isAdmin={isAdmin}
@@ -29,6 +32,11 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
                         </p>
                     </div>
 
+                    <div>
+                        <h1>Total November Count: {total_nov_count}</h1>
+                        <h1>Total December Count: {total_dec_count}</h1>
+                        <h1>Total Cumulative Count: {total_cumulative_count}</h1>
+                    </div>
 
                     {/* <DashboardStats current_user={current_user} cumulative={cumulativeAll} weekly={weeklyAll} monthly={monthlyAll}/> */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
@@ -78,7 +86,23 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
             )
             :
             (
-                <AdminDashboard current_user={current_user} cumulative={cumulative} facultyRanking={facultyRanking} weekly={last_week} monthly={last_month} isAdmin={isAdmin} weeklyAll={weeklyAll} monthlyAll={monthlyAll} cumulativeAll={cumulativeAll} transactions={transactions} />
+                <AdminDashboard 
+                current_user={current_user} 
+                cumulative={cumulative} 
+                facultyRanking={facultyRanking} 
+                weekly={last_week} 
+                monthly={last_month} 
+                isAdmin={isAdmin} 
+                weeklyAll={weeklyAll} 
+                monthlyAll={monthlyAll} 
+                cumulativeAll={cumulativeAll} 
+                transactions={transactions}
+                total_nov_count = {total_nov_count} 
+                total_dec_count = {total_dec_count}
+                total_cumulative_count = {total_cumulative_count}
+                campusDistribution = {campusDistribution}
+                monthlyTransactions = {monthlyTransactions}
+                lineChartData = {lineChartData} />
             )}
         </AuthenticatedLayout>
     );

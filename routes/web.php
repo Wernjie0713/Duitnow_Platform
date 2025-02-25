@@ -71,6 +71,41 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $dashboardController = new DashboardController();
         $facultyRanking = $dashboardController->getFacultyRanking()->getData();
 
+        $allRelevantUsers = User::where('id', '!=', 1)
+        ->where('is_profile_complete', true)
+        ->get();
+
+        $totalNovCount       = $allRelevantUsers->sum('nov_count');      // *** ADDED
+        $totalDecCount       = $allRelevantUsers->sum('dec_count');      // *** ADDED
+        $totalCumulativeCount= $allRelevantUsers->sum('total_count');    // *** ADDED
+
+        $skudaiCount = User::where('campus', 'UTM JOHOR BAHRU')->count();
+        $klCount     = User::where('campus', 'UTM KUALA LUMPUR')->count();
+        $pagohCount  = User::where('campus', 'UTM PAGOH')->count();
+
+        $novCount = Transaction::whereBetween('date', ['2024-11-01', '2024-11-30'])->count();
+        $decCount = Transaction::whereBetween('date', ['2024-12-01', '2024-12-31'])->count();
+
+        $topWinners = User::orderBy('total_count', 'desc')
+                    ->take(10)
+                    ->get();
+                    $trendData = [];
+        foreach ($topWinners as $user) {
+            // Group by date, e.g. for Nov 10 to Dec 31, 2024
+            $userTransactions = Transaction::selectRaw('date, count(*) as total')
+                ->where('user_id', $user->id)
+                ->whereBetween('date', ['2024-11-01', '2024-12-31'])
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+
+            $trendData[] = [
+                'user_id' => $user->id,
+                'name'    => $user->name,
+                'data'    => $userTransactions, 
+            ];
+        }
+
         return Inertia::render('Dashboard', [
             'cumulative' => User::where('id', '!=', 1)
                     ->where('is_profile_complete', true)
@@ -126,7 +161,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'facultyRanking' => $facultyRanking,
             'transactions' => Transaction::with('user')
                 ->orderBy('id', 'desc')
-                ->paginate(10)
+                ->paginate(10),
+            'total_nov_count'       => $totalNovCount,
+            'total_dec_count'       => $totalDecCount,
+            'total_cumulative_count'=> $totalCumulativeCount,
+            'campusDistribution' => [
+                'skudai' => $skudaiCount,
+                'kl'     => $klCount,
+                'pagoh'  => $pagohCount,
+            ],
+            'monthlyTransactions' => [
+                'nov' => $novCount,
+                'dec' => $decCount,
+            ],
+            'lineChartData' => $trendData,
         ]);
     })->name('dashboard');
 });

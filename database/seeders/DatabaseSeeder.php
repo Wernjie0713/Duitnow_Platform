@@ -25,14 +25,14 @@ class DatabaseSeeder extends Seeder
 
         $admin->assign(['admin']);
 
-        $user = User::factory()->create([
-            'name' => 'User',
-            'email' => 'user@example.com',
-            'email_verified_at' => now(),
-            'is_profile_complete' => true,
-        ]);
+        // $user = User::factory()->create([
+        //     'name' => 'User',
+        //     'email' => 'user@example.com',
+        //     'email_verified_at' => now(),
+        //     'is_profile_complete' => true,
+        // ]);
 
-        $user->assign(['user']);
+        // $user->assign(['user']);
 
         // Define abilities
         BouncerFacade::ability()->firstOrCreate([
@@ -50,5 +50,9 @@ class DatabaseSeeder extends Seeder
 
         BouncerFacade::allow('user')->to('edit-profile');
         BouncerFacade::disallow('admin')->to('edit-profile');
+
+        // $this->call([
+        //     UsersTableSeeder::class,
+        // ]);
     }
 }

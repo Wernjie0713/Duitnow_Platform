@@ -39,9 +39,9 @@ export default function Authenticated({ header, children, isAdmin }: PropsWithCh
                                 </NavLink>)
                                 } */}
 
-                                <NavLink href={route('contactus.index')} active={route().current('contactus.index')}>
+                                {/* <NavLink href={route('contactus.index')} active={route().current('contactus.index')}>
                                     Contact Us
-                                </NavLink>
+                                </NavLink> */}
                             </div>
                         </div>
 
@@ -121,7 +121,7 @@ export default function Authenticated({ header, children, isAdmin }: PropsWithCh
                                 Transaction
                             </ResponsiveNavLink>)
                         } */}
-                        <ResponsiveNavLink href={route('contactus.index')}>Contact Us</ResponsiveNavLink>
+                        {/* <ResponsiveNavLink href={route('contactus.index')}>Contact Us</ResponsiveNavLink> */}
                     </div>
 
                     <div className="pt-4 pb-1 border-t border-gray-200">

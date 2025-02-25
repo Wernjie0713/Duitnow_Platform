@@ -195,7 +195,7 @@ export default function AdminDashboard({
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       {/* Charts Section at the Top */}
       <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-        <h2 className="text-xl font-semibold mb-4">Admin Analytics</h2>
+        {/* <h2 className="text-xl font-semibold mb-4">Admin Analytics</h2> */}
         <div className="grid grid-cols-2 gap-4">
           {/* Left Column: Grid with 2 rows */}
           <div className="grid grid-rows-2 gap-4">
@@ -242,14 +242,13 @@ export default function AdminDashboard({
       </div>
 
       {/* Table Selection & Filters Section */}
-      <div className="bg-white rounded-lg shadow p-4 sm:p-6 max-w-md mt-6">
+      {/* <div className="bg-white rounded-lg shadow p-4 sm:p-6 max-w-md mt-6">
         <InputLabel htmlFor={selectedValue} value="Filter Table" className="mb-2 pl-1 font-semibold" />
         <Select onValueChange={handleSelectedChange} value={selectedValue}>
           <SelectTrigger>
             <SelectValue placeholder="Select table"></SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Weekly">Weekly</SelectItem>
             <SelectItem value="Monthly">Monthly</SelectItem>
             <SelectItem value="Cumulative">Cumulative</SelectItem>
             <SelectItem value="FacultyRanking">Faculty Ranking</SelectItem>
@@ -296,10 +295,10 @@ export default function AdminDashboard({
             </Select>
           )}
         </div>
-      </div>
+      </div> */}
 
       {/* Tables Section */}
-      <div className="bg-white rounded-lg shadow p-4 sm:p-6 mt-6">
+      {/* <div className="bg-white rounded-lg shadow p-4 sm:p-6 mt-6">
         {selectedValue === 'Weekly' && (
           <WeeklyLeaderboardTable
             users={weekly.data}
@@ -340,7 +339,7 @@ export default function AdminDashboard({
         {selectedValue === 'TransactionTable' && (
           <TransactionTable transactions={transactions.data} links={transactions.links} />
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -111,7 +111,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->where('is_profile_complete', true)
                     ->orderBy('total_count', 'desc')
                     ->orderBy('name', 'asc')
-                    ->paginate(10),
+                    ->paginate(10)->lazy(),
 
             // 'monthly' => User::where('id', '!=', 1)
             //                 ->where('is_profile_complete', true)
@@ -123,7 +123,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                             ->where('is_profile_complete', true)
                             ->orderBy('dec_count', 'desc')
                             ->orderBy('name', 'asc')
-                            ->paginate(10),
+                            ->paginate(10)->lazy(),
 
             // 'weekly' => User::where('id', '!=', 1)
             //                 ->where('is_profile_complete', true)
@@ -135,26 +135,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
                             ->where('is_profile_complete', true)
                             ->orderBy('week7_count', 'desc')
                             ->orderBy('name', 'asc')
-                            ->paginate(10),
+                            ->paginate(10)->lazy(),
                             
 
             'cumulativeAll' => User::where('id', '!=', 1)
                                 ->where('is_profile_complete', true)
                                 ->orderBy('total_count', 'desc')
                                 ->orderBy('name', 'asc')
-                                ->get(),
+                                ->get()->lazy(),
 
             'monthlyAll' => User::where('id', '!=', 1)
                                 ->where('is_profile_complete', true)
                                 ->orderBy('dec_count', 'desc')
                                 ->orderBy('name', 'asc')
-                                ->get(),
+                                ->get()->lazy(),
 
             'weeklyAll' => User::where('id', '!=', 1)
                             ->where('is_profile_complete', true)
                             ->orderBy('week7_count', 'desc')
                             ->orderBy('name', 'asc')
-                            ->get(),
+                            ->get()->lazy(),
                             
             'current_user' => Auth::user(),
             'isAdmin' => BouncerFacade::is(Auth::user())->an('admin'),

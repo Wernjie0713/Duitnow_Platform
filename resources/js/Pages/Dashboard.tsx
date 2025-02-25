@@ -19,7 +19,7 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
                 : <h2 className="font-semibold text-xl text-gray-800 leading-tight">Admin Dashboard</h2>}
         >
             <Head title="Dashboard" />
-            {!isAdmin
+            {/* {!isAdmin
             ?
             (
                 <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
@@ -36,12 +36,12 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
                         <h1>Total November Count: {total_nov_count}</h1>
                         <h1>Total December Count: {total_dec_count}</h1>
                         <h1>Total Cumulative Count: {total_cumulative_count}</h1>
-                    </div>
+                    </div> */}
 
                     {/* <DashboardStats current_user={current_user} cumulative={cumulativeAll} weekly={weeklyAll} monthly={monthlyAll}/> */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                    {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6"> */}
                         {/* Leaderboard tables wrapped with responsive classes */}
-                        <div className='flex-1 bg-white rounded-lg shadow p-8'>
+                        {/* <div className='flex-1 bg-white rounded-lg shadow p-8'>
                             <WeeklyLeaderboardTable
                                 users={last_week.data}
                                 links={last_week.links}
@@ -77,15 +77,15 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
                                 cumulativeAll={cumulativeAll}
                             />
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* <div className='bg-white rounded-lg shadow p-4 sm:p-4 mt-6 text-center'>
                         <TermsAndCondition />
                     </div> */}
-                </div>
+                {/* </div>
             )
             :
-            (
+            ( */}
                 <AdminDashboard 
                 current_user={current_user} 
                 cumulative={cumulative} 
@@ -103,7 +103,7 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
                 campusDistribution = {campusDistribution}
                 monthlyTransactions = {monthlyTransactions}
                 lineChartData = {lineChartData} />
-            )}
+            {/* )} */}
         </AuthenticatedLayout>
     );
 }

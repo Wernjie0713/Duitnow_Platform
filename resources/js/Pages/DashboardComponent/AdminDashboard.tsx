@@ -257,7 +257,7 @@ export default function AdminDashboard({
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       {/* Charts Section: 2x2 Grid */}
       <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* First Row */}
           <div className="bg-white shadow p-4 h-[18rem]">
             <h3 className="font-semibold mb-2">Campus Distribution</h3>

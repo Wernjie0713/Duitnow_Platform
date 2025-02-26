@@ -10,7 +10,8 @@ import AdminDashboard from './DashboardComponent/AdminDashboard';
 
 export default function Dashboard({ cumulative, monthly, weekly, facultyRanking, current_user, isAdmin, cumulativeAll, monthlyAll, 
     weeklyAll, transactions, last_week, last_month, total_nov_count, total_dec_count, total_cumulative_count,
-    campusDistribution, monthlyTransactions, lineChartData, total_users, total_transactions }) {
+    campusDistribution, monthlyTransactions, lineChartData, total_users, total_transactions,
+    transactionTypeCounts }) {
     
     return (
         <AuthenticatedLayout
@@ -109,7 +110,8 @@ export default function Dashboard({ cumulative, monthly, weekly, facultyRanking,
                 total_cumulative_count = {total_cumulative_count}
                 campusDistribution = {campusDistribution}
                 monthlyTransactions = {monthlyTransactions}
-                lineChartData = {lineChartData} />
+                lineChartData = {lineChartData}
+                transactionTypeCounts={transactionTypeCounts} />
                 
             {/* )} */}
         </AuthenticatedLayout>

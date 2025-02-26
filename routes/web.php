@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\FacultyRankingController;
 use App\Http\Controllers\ContactUsController;
 use App\Models\Transaction;
-
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
     return Inertia::render('Auth/Login', [
@@ -106,6 +106,33 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ];
         }
 
+        // Group by transaction_type and count
+        $transactionCounts = DB::table('transactions')
+            ->selectRaw('transaction_type, COUNT(*) as count')
+            ->groupBy('transaction_type')
+            ->get();
+
+        // Create an associative array mapping type to count.
+        // If transaction_type is NULL, group it under "NULL"
+        $transactionTypeCounts = [
+            'DuitNow QR TNGD' => 0,
+            'DuitNow QR'      => 0,
+            'Payment'         => 0,
+            'NULL'            => 0,
+        ];
+
+        foreach ($transactionCounts as $record) {
+            // $record->transaction_type may be null.
+            $key = $record->transaction_type ?? 'NULL';
+            // If the key exists in our array, add the count.
+            if (array_key_exists($key, $transactionTypeCounts)) {
+                $transactionTypeCounts[$key] = $record->count;
+            } else {
+                // If you want to include any extra types, you can merge here.
+                $transactionTypeCounts[$key] = $record->count;
+            }
+        }
+
         return Inertia::render('Dashboard', [
             // 'cumulative' => User::where('id', '!=', 1)
             //         ->where('is_profile_complete', true)
@@ -177,6 +204,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'lineChartData' => $trendData,
             'total_users' => User::where('id', '!=', 1)->where('is_profile_complete', true)->count(),
             'total_transactions' => Transaction::count(),
+            'transactionTypeCounts' => $transactionTypeCounts,
         ]);
     })->name('dashboard');
 });

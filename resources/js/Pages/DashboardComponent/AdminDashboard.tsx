@@ -27,7 +27,7 @@ import WeeklyLeaderboardTable from './WeeklyLeaderboardTable';
 import FacultyRankingTable from './FacultyRankingTable';
 import TransactionTable from "./TransactionTable";
 
-// Register all necessary Chart.js components
+// Register Chart.js components
 ChartJS.register(
   ArcElement, 
   Tooltip, 
@@ -43,18 +43,51 @@ ChartJS.register(
 const vividColors = [
   "#FF5733", // bright red-orange
   "#33FF57", // bright green
-  "#3357FF", // vivid blue
-  "#FF33A1", // hot pink
-  "#A133FF", // vivid purple
+  "#FF8F33", // vivid orange for Transfer
+  "#A1FF33", // bright lime green
   "#33FFF5", // bright cyan
-  "#FF8F33", // vivid orange
-  "#FF3333", // bright red
-  "#33FFB5", // bright turquoise
-  "#B533FF"  // vivid magenta
+  "#FF33A1", // bright pink
+  "#A133FF", // bright purple
+  "#FFA133", // bright amber
+  "#3333FF", // bright blue
+  "#FF33FF", // bright magenta
+  "#33FF33", // bright green
 ];
 
-export default function AdminDashboard({
+interface AdminDashboardProps {
   // Leaderboard and table props
+  weekly: any;
+  monthly: any;
+  cumulative: any;
+  facultyRanking: any;
+  weeklyAll: any;
+  monthlyAll: any;
+  cumulativeAll: any;
+  transactions: any;
+  current_user: any;
+  isAdmin: boolean;
+
+  // Summations
+  total_nov_count: number;
+  total_dec_count: number;
+  total_cumulative_count: number;
+
+  // Chart data props
+  campusDistribution: { skudai: number; kl: number; pagoh: number };
+  monthlyTransactions: { nov: number; dec: number };
+  lineChartData: any; // daily data for top 10 winners
+
+  // New prop: raw counts for transaction types (including NULL)
+  transactionTypeCounts: {
+    "DuitNow QR TNGD": number;
+    "DuitNow QR": number;
+    "Payment": number;
+    "transfer": number;
+    "NULL": number;
+  };
+}
+
+export default function AdminDashboard({
   weekly,
   monthly,
   cumulative,
@@ -65,17 +98,14 @@ export default function AdminDashboard({
   transactions,
   current_user,
   isAdmin,
-
-  // Summations
   total_nov_count,
   total_dec_count,
   total_cumulative_count,
-
-  // Chart data props
-  campusDistribution,   // e.g. { skudai, kl, pagoh }
-  monthlyTransactions,  // e.g. { nov, dec }
-  lineChartData         // daily data for top 10 winners
-}) {
+  campusDistribution,
+  monthlyTransactions,
+  lineChartData,
+  transactionTypeCounts
+}: AdminDashboardProps) {
   // --------------------------
   // 1) State & Handlers for Table Filtering
   // --------------------------
@@ -92,19 +122,19 @@ export default function AdminDashboard({
     return saved !== null ? Number(saved) : 10;
   });
 
-  const handleSelectedChange = (value) => {
+  const handleSelectedChange = (value: string) => {
     setSelectedValue(value);
     localStorage.setItem("selectedValue", value);
     setSelectedTime(0);
   };
 
-  const handleSelectedTime = (value) => {
+  const handleSelectedTime = (value: string) => {
     const numericValue = parseInt(value, 10);
     setSelectedTime(numericValue);
     localStorage.setItem("selectedTime", numericValue.toString());
   };
 
-  const handleSelectedNumber = (value) => {
+  const handleSelectedNumber = (value: string) => {
     const numericValue = parseInt(value, 10);
     setSelectedNumber(numericValue);
     localStorage.setItem("selectedNumber", numericValue.toString());
@@ -120,7 +150,7 @@ export default function AdminDashboard({
   // --------------------------
   // 2) Chart Data Setup
   // --------------------------
-  // a) Pie Chart: Campus Distribution
+  // a) Campus Distribution Pie Chart
   const campusPieData = {
     labels: ['UTM Johor Bahru', 'UTM Kuala Lumpur', 'UTM Pagoh'],
     datasets: [
@@ -139,15 +169,13 @@ export default function AdminDashboard({
     plugins: {
       legend: {
         position: 'right' as const,
-        labels: {
-          font: { size: 14 }
-        }
+        labels: { font: { size: 14 } }
       }
     },
     maintainAspectRatio: false,
   };
 
-  // b) Bar Chart: Monthly Transactions
+  // b) Monthly Transactions Bar Chart
   const monthlyBarData = {
     labels: ['November', 'December'],
     datasets: [
@@ -163,9 +191,7 @@ export default function AdminDashboard({
   };
   const monthlyBarOptions = {
     plugins: {
-      legend: {
-        display: false // Hide legend if it looks weird
-      }
+      legend: { display: false }
     },
     maintainAspectRatio: false,
   };
@@ -177,65 +203,85 @@ export default function AdminDashboard({
     plugins: {
       legend: {
         position: 'bottom' as const,
-        labels: {
-          font: { size: 12 },
-          // Note: Chart.js doesn't natively support multi-column legends.
-          // For a custom layout, you might disable the built‑in legend
-          // and render a custom HTML legend below the chart.
-        }
+        labels: { font: { size: 12 } }
+      }
+    },
+    maintainAspectRatio: false,
+  };
+
+  // d) Transaction Type Pie Chart:
+  // First, extract raw counts
+  const rawTNGD = transactionTypeCounts["DuitNow QR TNGD"] || 0;
+  const rawQR = transactionTypeCounts["DuitNow QR"] || 0;
+  const rawPayment = transactionTypeCounts["Payment"] || 0;
+  const rawTransfer = transactionTypeCounts["transfer"] || 0;
+  const nullCount = transactionTypeCounts["NULL"] || 0;
+
+  // Distribute NULL count using the scale 5:3:2:1.
+  const totalWeight = 5 + 3 + 2 + 1; // 11
+  const additionalTNGD = Math.floor(nullCount * 5 / totalWeight);
+  const additionalQR = Math.floor(nullCount * 3 / totalWeight);
+  const additionalPayment = Math.floor(nullCount * 2 / totalWeight);
+  // Ensure the remainder is assigned to transfer:
+  const additionalTransfer = nullCount - (additionalTNGD + additionalQR + additionalPayment);
+
+  const adjustedTNGD = rawTNGD + additionalTNGD;
+  const adjustedQR = rawQR + additionalQR;
+  const adjustedPayment = rawPayment + additionalPayment;
+  const adjustedTransfer = rawTransfer + additionalTransfer;
+
+  const transactionTypePieData = {
+    labels: ["DuitNow QR TNGD", "DuitNow QR", "Payment", "Transfer"],
+    datasets: [
+      {
+        label: "Transaction Types",
+        data: [adjustedTNGD, adjustedQR, adjustedPayment, adjustedTransfer],
+        backgroundColor: ["#FF5733", "#33FF57", "#3357FF", "#FF8F33"],
+      }
+    ]
+  };
+  const transactionTypePieOptions = {
+    plugins: {
+      legend: {
+        position: 'right' as const,
+        labels: { font: { size: 14 } }
       }
     },
     maintainAspectRatio: false,
   };
 
   // --------------------------
-  // 3) Render: Charts at Top, then Table Selection & Tables
+  // 3) Render: 2x2 Grid of Charts at the Top, then Table Sections
   // --------------------------
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Charts Section at the Top */}
+      {/* Charts Section: 2x2 Grid */}
       <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-        {/* <h2 className="text-xl font-semibold mb-4">Admin Analytics</h2> */}
         <div className="grid grid-cols-2 gap-4">
-          {/* Left Column: Grid with 2 rows */}
-          <div className="grid grid-rows-2 gap-4">
-            
-            <div className="bg-white shadow p-4 h-[18rem]">
-              <h3 className="font-semibold mb-2">Campus Distribution</h3>
-              <div className="h-[14rem]">
-                <Pie data={campusPieData} options={campusPieOptions} />
-              </div>
+          {/* First Row */}
+          <div className="bg-white shadow p-4 h-[18rem]">
+            <h3 className="font-semibold mb-2">Campus Distribution</h3>
+            <div className="h-[14rem]">
+              <Pie data={campusPieData} options={campusPieOptions} />
             </div>
-
-            <div className="bg-white shadow p-4 h-[18rem]">
-              <h3 className="font-semibold mb-2">Monthly Transactions</h3>
-              <div className="h-[15rem]">
-                <Bar data={monthlyBarData} options={monthlyBarOptions} />
-              </div>
-            </div>
-            
           </div>
-          {/* Right Column: Line Chart spanning both rows with increased height */}
-          <div className="h-[37rem]">
-            <div className="bg-white shadow p-4 h-full">
-              <h3 className="font-semibold mb-2">Top 10 Winners Trend</h3>
-              <div className="h-[34rem]">
-                <Line data={lineChartMonthlyData} options={lineChartOptions} />
-              </div>
-              {/* 
-                For a custom multi-column legend below the line chart, you could disable
-                the built-in legend (legend.display: false) and then render your own custom
-                legend here using the lineChartMonthlyData.datasets.
-                For example, you might render a div with flex-wrap and two columns.
-              */}
-              {/* <div className="mt-2 flex flex-wrap">
-                {lineChartMonthlyData.datasets.map((ds, index) => (
-                  <div key={index} className="w-1/2 flex items-center mb-1">
-                    <span className="w-4 h-4 mr-2" style={{ backgroundColor: ds.borderColor }}></span>
-                    <span className="text-sm">{ds.label}</span>
-                  </div>
-                ))}
-              </div> */}
+          <div className="bg-white shadow p-4 h-[18rem]">
+            <h3 className="font-semibold mb-2">Transaction Type Distribution</h3>
+            <div className="h-[14rem]">
+              <Pie data={transactionTypePieData} options={transactionTypePieOptions} />
+            </div>
+          </div>
+          {/* Second Row */}
+          <div className="bg-white shadow p-4 h-[30rem]">
+            <h3 className="font-semibold mb-2">Monthly Transactions</h3>
+            <div className="h-[27rem]">
+              <Bar data={monthlyBarData} options={monthlyBarOptions} />
+            </div>
+          </div>
+          <div className="bg-white shadow p-4 h-[30rem]">
+            <h3 className="font-semibold mb-2">Top 10 Winners Trend</h3>
+            <div className="h-[27rem]">
+              <Line data={lineChartMonthlyData} options={lineChartOptions} />
             </div>
           </div>
         </div>
@@ -249,6 +295,7 @@ export default function AdminDashboard({
             <SelectValue placeholder="Select table"></SelectValue>
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="Weekly">Weekly</SelectItem>
             <SelectItem value="Monthly">Monthly</SelectItem>
             <SelectItem value="Cumulative">Cumulative</SelectItem>
             <SelectItem value="FacultyRanking">Faculty Ranking</SelectItem>
@@ -297,8 +344,9 @@ export default function AdminDashboard({
         </div>
       </div> */}
 
-      {/* Tables Section */}
-      {/* <div className="bg-white rounded-lg shadow p-4 sm:p-6 mt-6">
+      {/* Tables Section (Optional, commented out) */}
+      {/*
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6 mt-6">
         {selectedValue === 'Weekly' && (
           <WeeklyLeaderboardTable
             users={weekly.data}
@@ -339,7 +387,8 @@ export default function AdminDashboard({
         {selectedValue === 'TransactionTable' && (
           <TransactionTable transactions={transactions.data} links={transactions.links} />
         )}
-      </div> */}
+      </div>
+      */}
     </div>
   );
 }
@@ -348,12 +397,12 @@ export default function AdminDashboard({
  * Aggregates daily lineChartData into monthly totals for each user.
  * Returns an array of objects: { user_id, name, nov, dec }.
  */
-function aggregateToMonthly(rawLineData) {
-  const monthlySummary = [];
+function aggregateToMonthly(rawLineData: any[]): { user_id: number; name: string; nov: number; dec: number }[] {
+  const monthlySummary: { user_id: number; name: string; nov: number; dec: number }[] = [];
   rawLineData.forEach(userObj => {
     let novSum = 0;
     let decSum = 0;
-    userObj.data.forEach(({ date, total }) => {
+    userObj.data.forEach(({ date, total }: { date: string; total: number }) => {
       const month = new Date(date).getMonth() + 1; // 1=Jan, 11=Nov, 12=Dec
       if (month === 11) {
         novSum += total;
@@ -376,7 +425,7 @@ function aggregateToMonthly(rawLineData) {
  * [0, November total, December total].
  * Labels: ["Initial", "November", "December"]
  */
-function buildLineChartForMonths(monthlySummary) {
+function buildLineChartForMonths(monthlySummary: { user_id: number; name: string; nov: number; dec: number }[]) {
   const labels = ['Initial', 'November', 'December'];
   const datasets = monthlySummary.map((user, index) => ({
     label: user.name,
@@ -386,8 +435,4 @@ function buildLineChartForMonths(monthlySummary) {
     tension: 0.1
   }));
   return { labels, datasets };
-}
-
-function randomColor() {
-  return '#' + Math.floor(Math.random() * 16777215).toString(16);
 }

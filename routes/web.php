@@ -118,6 +118,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'DuitNow QR TNGD' => 0,
             'DuitNow QR'      => 0,
             'Payment'         => 0,
+            'Transfer'        => 0,
             'NULL'            => 0,
         ];
 

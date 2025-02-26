@@ -82,7 +82,7 @@ interface AdminDashboardProps {
     "DuitNow QR TNGD": number;
     "DuitNow QR": number;
     "Payment": number;
-    "transfer": number;
+    "Transfer": number;
     "NULL": number;
   };
 }
@@ -214,7 +214,7 @@ export default function AdminDashboard({
   const rawTNGD = transactionTypeCounts["DuitNow QR TNGD"] || 0;
   const rawQR = transactionTypeCounts["DuitNow QR"] || 0;
   const rawPayment = transactionTypeCounts["Payment"] || 0;
-  const rawTransfer = transactionTypeCounts["transfer"] || 0;
+  const rawTransfer = transactionTypeCounts["Transfer"] || 0;
   const nullCount = transactionTypeCounts["NULL"] || 0;
 
   // Distribute NULL count using the scale 5:3:2:1.

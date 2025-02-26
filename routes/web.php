@@ -175,6 +175,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'dec' => $decCount,
             ],
             'lineChartData' => $trendData,
+            'total_users' => User::where('id', '!=', 1)->where('is_profile_complete', true)->count(),
+            'total_transactions' => Transaction::count(),
         ]);
     })->name('dashboard');
 });
